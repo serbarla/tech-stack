@@ -10,7 +10,6 @@
     "clean": "git clean -xdf .cache node_modules dist"
   },
   "dependencies": {
-    "@acme/api": "workspace:*",
     "@acme/tailwind-config": "workspace:*",
     "@acme/validators": "workspace:*",
     "@elysiajs/eden": "catalog:",
@@ -22,6 +21,7 @@
     "varlock": "catalog:"
   },
   "devDependencies": {
+    "@acme/api": "workspace:*",
     "@acme/tsconfig": "workspace:*",
     "@solidjs/diagnostics": "^2.0.0-rc.17",
     "@solidjs/meta": "^1.0.0-next.2",

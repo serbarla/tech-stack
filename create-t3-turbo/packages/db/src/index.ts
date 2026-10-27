@@ -1,7 +1,10 @@
 import type { SqlEntityManager } from "@mikro-orm/sql";
 import { MikroORM, NodeSqliteDialect, SqliteDriver } from "@mikro-orm/sql";
 
+import { getDatabasePath } from "./db-path";
 import { Post } from "./entities/post";
+
+export { getDatabasePath } from "./db-path";
 
 export type Orm = MikroORM<
   SqliteDriver,
@@ -12,7 +15,7 @@ export type Orm = MikroORM<
 let orm: Orm | undefined;
 
 export async function initDb(): Promise<Orm> {
-  const path = process.env.DATABASE_URL ?? "./sqlite.db";
+  const path = getDatabasePath();
   orm = await MikroORM.init<
     SqliteDriver,
     SqlEntityManager<SqliteDriver>,

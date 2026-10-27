@@ -68,7 +68,7 @@ tooling
 ## Quick Start
 
 > **Note**
-> The [db](./packages/db) package uses a local SQLite file (`DATABASE_URL`, default `./sqlite.db`) through `node:sqlite` — no Postgres or Supabase required. If you're using something else, adapt the [driver](./packages/db/src/index.ts), the [entities](./packages/db/src/entities) and the MikroORM config.
+> The [db](./packages/db) package uses a local SQLite file (`DATABASE_URL`, default `data/sqlite.db`) through `node:sqlite` — no Postgres or Supabase required. If you're using something else, adapt the [driver](./packages/db/src/index.ts), the [entities](./packages/db/src/entities) and the MikroORM config.
 
 To get it running, follow the steps below:
 
@@ -97,7 +97,7 @@ Environment variables (see `.env.schema`):
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | SQLite file path (`./sqlite.db` locally, `/data/sqlite.db` in Docker) |
+| `DATABASE_URL` | SQLite file path (`data/sqlite.db` locally, `/data/sqlite.db` in Docker) |
 | `BETTER_AUTH_URL` | Public URL of the Elysia server (better-auth base URL) |
 | `PORT` | Server port (default `3000`) |
 | `AUTH_SECRET` | better-auth secret (`openssl rand -base64 32`) |
