@@ -15,14 +15,14 @@ export async function initAuth<
   baseUrl: string;
   productionUrl: string;
   secret: string | undefined;
+  databaseUrl: string;
 
   discordClientId: string;
   discordClientSecret: string;
   extraPlugins?: TExtraPlugins;
 }): Promise<Auth> {
   const config: BetterAuthOptions = {
-    // eslint-disable-next-line no-restricted-properties -- DATABASE_URL is shared with @acme/db, injected by varlock
-    database: new DatabaseSync(process.env.DATABASE_URL ?? "./sqlite.db"),
+    database: new DatabaseSync(options.databaseUrl),
     baseURL: options.baseUrl,
     secret: options.secret,
     plugins: [
