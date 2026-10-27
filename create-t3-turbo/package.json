@@ -1,0 +1,31 @@
+{
+  "name": "create-t3-turbo",
+  "private": true,
+  "engines": {
+    "node": "^22.21.0",
+    "pnpm": "^10.19.0"
+  },
+  "packageManager": "pnpm@10.19.0",
+  "scripts": {
+    "build": "nx run-many -t build",
+    "clean": "nx run-many -t clean",
+    "dev": "nx run-many -t dev --parallel",
+    "format": "nx run-many -t format --parallel",
+    "lint": "nx run-many -t lint --parallel",
+    "typecheck": "nx run-many -t typecheck",
+    "db:migrate": "nx run @acme/db:migration:up",
+    "db:migration:create": "nx run @acme/db:migration:create",
+    "env:validate": "varlock load --path apps/server && varlock load --path apps/web && varlock load --path apps/expo && varlock load --path packages/db",
+    "env:freeze": "varlock freeze --path apps/server --out .varlock-frozen-env",
+    "lint:ws": "pnpm dlx sherif@latest",
+    "postinstall": "pnpm lint:ws"
+  },
+  "devDependencies": {
+    "@acme/prettier-config": "workspace:*",
+    "nx": "^23.3.0",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "varlock": "catalog:"
+  },
+  "prettier": "@acme/prettier-config"
+}

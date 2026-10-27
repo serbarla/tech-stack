@@ -1,0 +1,12 @@
+services:
+  server:
+    build: { context: ., dockerfile: Dockerfile.server }
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: /data/sqlite.db
+      _VARLOCK_ENV_KEY: ${_VARLOCK_ENV_KEY:?}
+    volumes: ["./data:/data"]
+  web:
+    build: { context: ., dockerfile: Dockerfile.web }
+    ports: ["3001:80"]
+    depends_on: [server]

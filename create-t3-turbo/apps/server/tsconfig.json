@@ -1,0 +1,8 @@
+{
+  "extends": "@acme/tsconfig/base.json",
+  "include": ["src", "env.d.ts"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "types": ["bun", "node"]
+  }
+}

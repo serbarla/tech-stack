@@ -1,0 +1,40 @@
+{
+  "name": "@acme/db",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "clean": "git clean -xdf .cache dist node_modules",
+    "dev": "tsc",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint --flag unstable_native_nodejs_ts_config",
+    "migration:create": "varlock run -- mikro-orm migration:create",
+    "migration:up": "varlock run -- mikro-orm migration:up",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "catalog:",
+    "@mikro-orm/sql": "catalog:",
+    "kysely": "catalog:"
+  },
+  "devDependencies": {
+    "@acme/eslint-config": "workspace:*",
+    "@acme/prettier-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
+    "@mikro-orm/cli": "catalog:",
+    "@mikro-orm/migrations": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "varlock": "catalog:"
+  },
+  "prettier": "@acme/prettier-config"
+}
