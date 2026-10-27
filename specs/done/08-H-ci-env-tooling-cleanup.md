@@ -2,7 +2,7 @@
 
 - Source: `NX_ELYSIA_SOLID_MIGRATION_PLAN.md` → `### Phase H`.
 - Depends on: specs 01–07 (all targets exist; `@acme/web:check` exists; server container verified).
-- Repo root: `create-t3-turbo/`. All paths/commands relative to it.
+- Repo root: `sb-stack-v1/`. All paths/commands relative to it.
 - Result carried forward: CI installs Bun (for `vp`/server), runs Nx targets only, has no Turbo/Vercel env, and `.env.example` describes the SQLite + Elysia contract instead of Postgres.
 
 ## Testing 
@@ -61,7 +61,7 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 ## 3. Testing criteria
 
 - [x] `ruby -ryaml -e 'YAML.load_file(".github/workflows/ci.yml"); YAML.load_file("tooling/github/setup/action.yml"); puts "ok"'` prints `ok` (or an equivalent YAML parse succeeds).
-- [ ] `grep -rn "turbo" .github tooling/github package.json` prints nothing. — DIVERGENCE (divergence 1): the literal grep matches only the workspace-root package name `create-t3-turbo` (`package.json:2`) and the two upstream `t3-oss/create-t3-turbo` discussion URLs (`.github/ISSUE_TEMPLATE/config.yml:3,6`); a tree-wide scan and the refined grep find zero Turborepo scripts, env vars, dependencies, or config. The workspace name and upstream links are permanent, so this literal check cannot pass by design.
+- [ ] `grep -rn "turbo" .github tooling/github package.json` prints nothing. — DIVERGENCE (divergence 1): the literal grep matches only the workspace-root package name `sb-stack-v1` (`package.json:2`) and the two upstream `t3-oss/create-t3-turbo` discussion URLs (`.github/ISSUE_TEMPLATE/config.yml:3,6`); a tree-wide scan and the refined grep find zero Turborepo scripts, env vars, dependencies, or config. The workspace name and upstream links are permanent, so this literal check cannot pass by design.
 - [x] `grep -n "setup-bun" tooling/github/setup/action.yml` prints the Bun step.
 - [x] `grep -n "check-web\|@acme/web:check" .github/workflows/ci.yml` prints the web job.
 - [x] `cp .env.example .env && pnpm lint && pnpm lint:ws` exits 0 (10/10 lint tasks, sherif `✓ No issues found`).
@@ -93,7 +93,7 @@ to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 ### Divergences
 
 1. **`turbo` grep can never print nothing (false positives only).** The
-   workspace-root package is literally named `create-t3-turbo`
+   workspace-root package is literally named `sb-stack-v1`
    (`package.json:2`), and `.github/ISSUE_TEMPLATE/config.yml:3,6` link to the
    upstream `t3-oss/create-t3-turbo` discussions. Both predate this spec, are
    unrelated to the orchestrator, and were left as-is: renaming the workspace

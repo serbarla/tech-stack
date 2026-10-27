@@ -97,7 +97,7 @@ Keep `data/sqlite.db` (and its `-shm`/`-wal`) — it is now the canonical file a
 
 ## Verification
 
-Run from repo root (`/Users/sergiobarba/orca/projects/tech-stack/create-t3-turbo`). Bun is required for the server and inspection.
+Run from repo root (`/Users/sergiobarba/orca/projects/tech-stack/sb-stack-v1`). Bun is required for the server and inspection.
 
 1. **Typecheck all packages**: `pnpm typecheck` — passes with no errors.
 2. **Single-file migration**: `pnpm db:migrate`, then confirm the `post` table exists in `data/sqlite.db` and no other file was created:

@@ -2,7 +2,7 @@
 
 - Source: `NX_ELYSIA_SOLID_MIGRATION_PLAN.md` → `### Phase A`.
 - Depends on: nothing (first spec).
-- Repo root: `create-t3-turbo/` (the pnpm workspace root, its own git repo). Every path and command below is relative to it.
+- Repo root: `sb-stack-v1/` (the pnpm workspace root, its own git repo). Every path and command below is relative to it.
 - Result carried forward: Nx is the only orchestrator; `apps/nextjs`, `apps/tanstack-start` and Turborepo are gone; the workspace installs and lints clean.
 
 ## Testing 
@@ -111,6 +111,6 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 - **`apps/expo/src/utils/api.tsx`: `getCookie()` is now async.** `@better-auth/expo@1.7.12` types `getCookie: () => Promise<string>` (was sync in 1.4 beta), so the tRPC `httpBatchLink` headers callback failed `TS2345`. Minimal repair: `async headers()` + `await authClient.getCookie()`. No Phase F objective implemented; the file is fully replaced in spec 06.
 - **`@acme/tailwind-config` lost its lint target.** Deleting `postcss-config.js` left zero lintable files (`theme*.css` only, config file ignored), and ESLint 9 errors with "all of the files matching the glob pattern '.' are ignored". Removed the `lint` script; also dropped the now-unused `postcss` dependency.
 - **`nx graph --file` output is a JS shell** (`.nx/graph.html` + `.nx/static/*`), not inline graph data; edge verification moved to `.nx/workspace-data/project-graph.json`.
-- **`turbo` grep false positives:** the repo is literally named `create-t3-turbo`, and each package's `clean` script still contains `.turbo` in its `git clean` path (untouched by this spec). The refined grep above targets the orchestrator only.
+- **`turbo` grep false positives:** the repo is literally named `sb-stack-v1`, and each package's `clean` script still contains `.turbo` in its `git clean` path (untouched by this spec). The refined grep above targets the orchestrator only.
 - **Frozen install:** the first `pnpm install` failed `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH` because the `overrides` block lost `vite`; regenerated once with `--no-frozen-lockfile`, after which `--frozen-lockfile` exits 0.
 - **Nx build scripts:** pnpm ignored the `nx` postinstall (native binding, alongside pre-existing `prisma`/`better-sqlite3`/`sharp` ignores); the Nx CLI, project graph, caching and all targets work regardless.

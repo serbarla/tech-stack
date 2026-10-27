@@ -2,7 +2,7 @@
 
 - Source: `SINGLE_DATABASE_BACKEND_PLAN.md` → Steps 1–3.
 - Depends on: specs 02/03 (MikroORM `@acme/db`, better-auth `@acme/auth` on `node:sqlite`), spec 05 (Elysia `apps/server`, sole `initAuth` caller).
-- Repo root: `create-t3-turbo/`. All paths/commands relative to it.
+- Repo root: `sb-stack-v1/`. All paths/commands relative to it.
 - Result carried forward: `getDatabasePath()` resolves `DATABASE_URL` against the workspace root (default `data/sqlite.db`); `@acme/db` (ORM + migration CLI) and `@acme/auth` open that one resolved file, wired explicitly by the server. The `.env.schema` default still reads `./sqlite.db` until spec 10 flips it, so this spec's checks run with `DATABASE_URL=data/sqlite.db` on the command line (real boot env wins over the varlock schema default — `@dynamic=boot`).
 
 ## Testing 
@@ -64,7 +64,7 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 *All boxes checked = spec done.*
 
 - [x] `pnpm lint && pnpm format && pnpm typecheck` exit 0 (repo root).
-- [x] objective 1 (cwd-independent resolution): `bun -e 'delete process.env.DATABASE_URL; const { getDatabasePath } = await import("./packages/db/src/db-path.ts"); console.log(getDatabasePath());'` from the repo root and the same with `./src/db-path.ts` from `packages/db` both print the identical absolute `…/create-t3-turbo/data/sqlite.db`; with `process.env.DATABASE_URL = "rel/x.db"` it prints `…/create-t3-turbo/rel/x.db`; with `process.env.DATABASE_URL = "/abs/x.db"` it prints `/abs/x.db`.
+- [x] objective 1 (cwd-independent resolution): `bun -e 'delete process.env.DATABASE_URL; const { getDatabasePath } = await import("./packages/db/src/db-path.ts"); console.log(getDatabasePath());'` from the repo root and the same with `./src/db-path.ts` from `packages/db` both print the identical absolute `…/sb-stack-v1/data/sqlite.db`; with `process.env.DATABASE_URL = "rel/x.db"` it prints `…/sb-stack-v1/rel/x.db`; with `process.env.DATABASE_URL = "/abs/x.db"` it prints `/abs/x.db`.
 - [x] objective 2 (migration CLI writes the resolved file): `rm -f data/sqlite.db data/sqlite.db-shm data/sqlite.db-wal && DATABASE_URL=data/sqlite.db pnpm db:migrate` exits 0 and recreates `data/sqlite.db` (fresh-file proof; gitignored dev artifact, recreated here per the plan's contingency), then `bun -e 'import { DatabaseSync } from "node:sqlite"; const db = new DatabaseSync("data/sqlite.db", { readOnly: true }); console.log(db.prepare("SELECT name FROM sqlite_master WHERE type = ? ORDER BY name").all("table"));'` lists `mikro_orm_migrations` and `post`.
 - [x] objective 3 (auth + server share that file): `DATABASE_URL=data/sqlite.db pnpm --filter @acme/server start` (leave running; from a second shell wait for `🦊 Elysia running at http://localhost:3000`), then re-run the objective-2 inspect → it now also lists `user`, `session`, `account`, `verification` — all tables in the single `data/sqlite.db`; `curl -s http://localhost:3000/api/posts` returns a JSON array served from `data/sqlite.db`; `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/api/protected` prints `401`. Stop the server afterwards.
 - [x] every objective in section 1 is checked (divergences, if any, appended here).

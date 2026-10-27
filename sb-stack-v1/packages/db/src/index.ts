@@ -4,8 +4,6 @@ import { MikroORM, NodeSqliteDialect, SqliteDriver } from "@mikro-orm/sql";
 import { getDatabasePath } from "./db-path";
 import { Post } from "./entities/post";
 
-export { getDatabasePath } from "./db-path";
-
 export type Orm = MikroORM<
   SqliteDriver,
   SqlEntityManager<SqliteDriver>,

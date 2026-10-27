@@ -1,5 +1,5 @@
 {
-  "name": "create-t3-turbo",
+  "name": "sb-stack-v1",
   "private": true,
   "engines": {
     "node": "^22.21.0",

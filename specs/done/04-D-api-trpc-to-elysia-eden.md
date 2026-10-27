@@ -2,7 +2,7 @@
 
 - Source: `NX_ELYSIA_SOLID_MIGRATION_PLAN.md` → `### Phase D`.
 - Depends on: spec 02 (`Post`, `getKysely()`), spec 03 (`Auth` type, `initAuth`), spec 01 (catalog `elysia`, `@elysiajs/cors`, `@elysiajs/eden`).
-- Repo root: `create-t3-turbo/`. All paths/commands relative to it.
+- Repo root: `sb-stack-v1/`. All paths/commands relative to it.
 - Result carried forward: `@acme/api` exports `createApp({ auth, orm })` and `type App` — the only source of Eden client types for web (spec 05) and Expo (spec 06). Zero tRPC left in the workspace.
 
 ## Testing 

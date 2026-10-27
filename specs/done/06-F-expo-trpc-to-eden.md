@@ -2,7 +2,7 @@
 
 - Source: `NX_ELYSIA_SOLID_MIGRATION_PLAN.md` → `### Phase F`.
 - Depends on: spec 04 (`type App`, recorded Eden call-site mapping), spec 05 (server on `3000`).
-- Repo root: `create-t3-turbo/`. All paths/commands relative to it.
+- Repo root: `sb-stack-v1/`. All paths/commands relative to it.
 - Result carried forward: `apps/expo` keeps React Native, React Query, better-auth, and `@acme/api` as a types-only dependency; every tRPC client/mutation is now an Eden call; `@trpc/*` and `superjson` are gone from the workspace.
 
 ## Testing 

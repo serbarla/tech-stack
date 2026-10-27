@@ -2,7 +2,7 @@
 
 - Source: `NX_ELYSIA_SOLID_MIGRATION_PLAN.md` → `### Phase G`.
 - Depends on: spec 05 (server on `3000`, `apps/web` build output, `pnpm nx run @acme/web:build`), spec 02/03 (SQLite file via `DATABASE_URL`), spec 01 (`nx.json` exists at the build context root).
-- Repo root / Docker build context: `create-t3-turbo/`.
+- Repo root / Docker build context: `sb-stack-v1/`.
 - Result carried forward: `docker compose up --build` serves the API on `3000` and the static Solid app on `3001`, with SQLite state persisted in `./data` (no DB container).
 
 ## Testing 

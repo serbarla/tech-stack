@@ -2,7 +2,7 @@
 
 - Source: `SINGLE_DATABASE_BACKEND_PLAN.md` → Steps 4–6 + full Verification.
 - Depends on: spec 09 (resolver + wiring landed; `getDatabasePath()` exported from `@acme/db`, `initAuth` takes `databaseUrl`).
-- Repo root: `create-t3-turbo/`. All paths/commands relative to it.
+- Repo root: `sb-stack-v1/`. All paths/commands relative to it.
 - Result carried forward: `DATABASE_URL` defaults to `data/sqlite.db` in `.env.schema` and README; `@acme/web` no longer depends on `@acme/api` at runtime; the stale stray `sqlite.db` files are gone and never recreated; exactly one SQLite file (`data/sqlite.db`) exists and only the backend writes it. Docker is unaffected (`Dockerfile.server` sets absolute `ENV DATABASE_URL=/data/sqlite.db`, which `getDatabasePath()` passes through as-is; `docker-compose.yml` already mounts `./data:/data`).
 
 ## Testing 

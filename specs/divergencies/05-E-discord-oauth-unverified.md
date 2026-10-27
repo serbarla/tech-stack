@@ -12,7 +12,7 @@
 
 ## What is broken
 
-`create-t3-turbo/.env` ships `AUTH_DISCORD_ID=''` and
+`sb-stack-v1/.env` ships `AUTH_DISCORD_ID=''` and
 `AUTH_DISCORD_SECRET=''`. With empty values, better-auth warns at boot
 ("Social provider discord is missing clientId or clientSecret") and
 `POST /api/auth/sign-in/social` returns **500 with an empty body**
@@ -47,9 +47,9 @@ Everything else in the flow passed, at wire level and in the browser:
 
 1. Create a Discord application (Discord Developer Portal → OAuth2), add the
    redirect URI `http://localhost:3000/api/auth/callback/discord`, and put the
-   client id/secret in `create-t3-turbo/.env`
+   client id/secret in `sb-stack-v1/.env`
    (`AUTH_DISCORD_ID`, `AUTH_DISCORD_SECRET`).
-2. Start the stack from `create-t3-turbo/`:
+2. Start the stack from `sb-stack-v1/`:
    ```
    pnpm nx run @acme/server:dev
    pnpm nx run @acme/web:dev
@@ -64,7 +64,7 @@ Everything else in the flow passed, at wire level and in the browser:
 
 ## Verification snapshot (2026-10-23)
 
-- `grep -nE "AUTH_DISCORD_(ID|SECRET)" create-t3-turbo/.env` → both empty.
+- `grep -nE "AUTH_DISCORD_(ID|SECRET)" sb-stack-v1/.env` → both empty.
 - `curl -X POST http://localhost:3000/api/auth/sign-in/social` → `500`, empty
   body; server logs `BETTER AUTH API ERROR`.
 - Seeded-session path: `POST /api/posts` → 200 with the HMAC-signed

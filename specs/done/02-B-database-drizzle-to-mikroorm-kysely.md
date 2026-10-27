@@ -2,7 +2,7 @@
 
 - Source: `NX_ELYSIA_SOLID_MIGRATION_PLAN.md` → `### Phase B`.
 - Depends on: spec 01 (Nx owns targets; catalog has `@mikro-orm/core`, `@mikro-orm/sql`, `@mikro-orm/migrations`, `kysely`).
-- Repo root: `create-t3-turbo/`. All paths/commands relative to it.
+- Repo root: `sb-stack-v1/`. All paths/commands relative to it.
 - Result carried forward: `@acme/db` exports `initDb()`, `getOrm()`, `getKysely()`, `Post`; migrations run through the MikroORM CLI; no Drizzle left anywhere.
 
 ## Testing 

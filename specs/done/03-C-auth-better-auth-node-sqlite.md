@@ -2,7 +2,7 @@
 
 - Source: `NX_ELYSIA_SOLID_MIGRATION_PLAN.md` → `### Phase C`.
 - Depends on: spec 02 (`@acme/db` no longer exports a Drizzle client; `initDb()` owns the shared SQLite file).
-- Repo root: `create-t3-turbo/`. All paths/commands relative to it.
+- Repo root: `sb-stack-v1/`. All paths/commands relative to it.
 - Result carried forward: `initAuth()` creates its own `node:sqlite` connection, auto-creates `user`/`session`/`account`/`verification`, trusts `expo://` and `http://localhost:3001`; no generated schema file, no CLI script.
 
 ## Testing 

@@ -1,4 +1,4 @@
-# create-t3-turbo
+# sb-stack-v1
 
 ## Installation
 
@@ -266,9 +266,3 @@ Deploying your Expo application works slightly differently compared to deploying
 ### Server & Web
 
 `docker compose up --build` is the reference deployment: Elysia on Bun (port 3000, migrations run at boot, SQLite volume at `./data`) and the built Solid bundle behind nginx (port 3001). Point `BETTER_AUTH_URL` and the clients' API base URL at your public host.
-
-## References
-
-The stack originates from [create-t3-app](https://github.com/t3-oss/create-t3-app).
-
-A [blog post](https://jumr.dev/blog/t3-turbo) where I wrote how to migrate a T3 app into this.

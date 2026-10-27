@@ -2,7 +2,7 @@
 
 - Source: `NX_ELYSIA_SOLID_MIGRATION_PLAN.md` → `### Phase E`.
 - Depends on: spec 04 (`createApp`, `type App`, recorded Eden call-site mapping), spec 03 (`initAuth`), spec 02 (`initDb`), spec 01 (catalog `elysia`, `@elysiajs/eden`, `solid-js`, `vite-plus`, `vitest`, `@types/bun`).
-- Repo root: `create-t3-turbo/`. All paths/commands relative to it.
+- Repo root: `sb-stack-v1/`. All paths/commands relative to it.
 - Result carried forward: server on port `3000` serving Elysia + better-auth; web on port `3001` using Vite+ (`vp`) with Solid 2 RC, Eden Treaty and better-auth client; ports fixed at `3000`/`3001`.
 
 ## Testing 
