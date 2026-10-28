@@ -1,5 +1,6 @@
 import { Title } from "@solidjs/meta";
 import { For } from "solid-js";
+
 import users from "../../lib/users.json";
 import { paths } from "../../router";
 

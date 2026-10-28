@@ -1,5 +1,5 @@
-import tailwindcss from "@tailwindcss/vite";
 import solid from "@solidjs/vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 import { varlockVitePlugin } from "@varlock/vite-integration";
 import { fileRoutes } from "filesystem-routing/vite";
 import { defineConfig } from "vite-plus";

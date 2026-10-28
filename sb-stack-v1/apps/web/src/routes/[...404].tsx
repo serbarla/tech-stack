@@ -1,5 +1,5 @@
-import { Title } from "@solidjs/meta";
 import type { RouteDefinition } from "@solidjs/router";
+import { Title } from "@solidjs/meta";
 import { httpStatus } from "@solidjs/web";
 
 // The catch-all route. httpStatus() is a no-op in the browser and takes

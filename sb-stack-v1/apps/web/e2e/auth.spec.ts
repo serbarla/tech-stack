@@ -15,11 +15,15 @@ test("sign up, create a post, sign out", async ({ page }) => {
   await expect(page.locator(".post-list")).toContainText("Hello e2e");
 
   await page.getByRole("button", { name: "Sign out" }).click();
-  await expect(page.getByRole("button", { name: "Need an account? Sign up" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Need an account? Sign up" }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Create" })).toBeHidden();
 });
 
-test("sign in rejects a wrong password and accepts the right one", async ({ page }) => {
+test("sign in rejects a wrong password and accepts the right one", async ({
+  page,
+}) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Need an account? Sign up" }).click();
   await page.getByLabel("Name").fill("E2E User 2");
