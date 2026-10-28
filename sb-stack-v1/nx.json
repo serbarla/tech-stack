@@ -47,6 +47,6 @@
       "cache": false
     }
   },
-  "defaultBase": "main",
+  "defaultBase": "master",
   "analytics": false
 }

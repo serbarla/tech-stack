@@ -186,7 +186,9 @@ Auth env vars (`AUTH_SECRET`) are read from your shell/`.env` by compose.
 
 ## CI
 
-[.github/workflows/ci.yml](./.github/workflows/ci.yml) runs `env`, `lint`, `format`, `typecheck` and `@acme/web:check` jobs on PRs, `main` pushes and merge queues, all using the composite setup action in `tooling/github/setup` (the `env` job validates the `.env.schema` contracts; no `.env` copy needed). Dependency updates are handled by Renovate.
+[.github/workflows/ci.yml](./.github/workflows/ci.yml) runs `env`, `lint`, `format`, `typecheck` and `@acme/web:check` jobs on PRs, `master` pushes and merge queues, all using the composite setup action in `tooling/github/setup` (the `env` job validates the `.env.schema` contracts; no `.env` copy needed). Dependency updates are handled by Renovate.
+
+This repo publishes on `master`, so both the CI push trigger and Nx's affected base (`"defaultBase"` in [nx.json](./nx.json)) point at `master`. Template adopters whose default branch is `main` must flip `"defaultBase"` back to `main` after export, or `nx affected` will diff against a branch that doesn't exist.
 
 ## FAQ
 

@@ -11,4 +11,4 @@ runs:
     - uses: oven-sh/setup-bun@v2
 
     - shell: bash
-      run: pnpm install
+      run: pnpm install --frozen-lockfile
