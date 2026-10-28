@@ -8,4 +8,8 @@ export default defineConfig(
   },
   baseConfig,
   restrictEnvAccess,
+  {
+    files: ["test/**"],
+    rules: { "no-restricted-properties": "off" },
+  },
 );

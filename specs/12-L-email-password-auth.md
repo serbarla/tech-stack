@@ -15,7 +15,7 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 ## 1. Objectives
 
-- [ ] 1. Enable email & password in `packages/auth/src/index.ts` — requirements: add to the `BetterAuthOptions` config exactly:
+- [x] 1. Enable email & password in `packages/auth/src/index.ts` — requirements: add to the `BetterAuthOptions` config exactly:
   ```ts
   emailAndPassword: {
     enabled: true,
@@ -23,9 +23,9 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
   ```
   Nothing else: `requireEmailVerification` omitted (= false), `autoSignIn` omitted (= true, sign-up returns a session immediately), password min length stays better-auth's default 8; no `sendResetPassword`/`sendVerificationEmail` — those endpoints stay unconfigured and unused; commands: `grep -n "emailAndPassword\|requireEmailVerification\|autoSignIn\|sendResetPassword\|sendVerificationEmail" packages/auth/src/index.ts` (only `emailAndPassword` appears)
 
-- [ ] 2. Build the web form in the `AuthShowcase` fallback (`apps/web/src/routes/index.tsx`) — requirements: reuse the `CreatePostForm` signal/error patterns and follow `apps/web/AGENTS.md`'s Solid 2 primer (reads in JSX/handlers only; `affects(x); refresh(x)` to refetch); the labels and button names below are the spec 14 e2e selectors — keep them exact; state: `mode = createSignal<"signin" | "signup">("signin")`, `name`, `email`, `password` (each `createSignal("")`), `formError = createSignal<string | null>(null)`; the fallback renders `<form class="auth-form" onSubmit={submit}>` with: `<h2>` text `Create account` (signup) / `Sign in` (signin); a Name field only when `mode() === "signup"` — `<label>Name<input type="text" required value={name()} onInput={...} /></label>`; `<label>Email<input type="email" required .../></label>`; `<label>Password<input type="password" required minlength={8} .../></label>`; `<Show when={formError()}>{(m) => <p class="form-error">{m()}</p>}</Show>`; a submit button text `Sign up` (signup) / `Sign in` (signin); a toggle button text `Need an account? Sign up` (signin) / `Have an account? Sign in` (signup) whose `onClick` flips `mode`; `submit` runs `event.preventDefault()` then signup → `const { error } = await authClient.signUp.email({ name: name(), email: email(), password: password() })`, signin → `const { error } = await authClient.signIn.email({ email: email(), password: password() })`; on `error`: `setFormError(error.message)`; on success: clear `name`/`email`/`password`, `setMode("signin")`, then `affects(props.session); void refresh(props.session);` — the same refetch pattern the existing `signOut` uses (better-auth's vanilla client also toggles its session signal on auth actions, but the Solid memo holds a stale promise, hence the explicit refresh); `signOut` and the signed-in block (`Signed in as {user().name ?? user().email}`, `Sign out` button) stay as-is; commands: `pnpm nx run @acme/web:check`
+- [x] 2. Build the web form in the `AuthShowcase` fallback (`apps/web/src/routes/index.tsx`) — requirements: reuse the `CreatePostForm` signal/error patterns and follow `apps/web/AGENTS.md`'s Solid 2 primer (reads in JSX/handlers only; `affects(x); refresh(x)` to refetch); the labels and button names below are the spec 14 e2e selectors — keep them exact; state: `mode = createSignal<"signin" | "signup">("signin")`, `name`, `email`, `password` (each `createSignal("")`), `formError = createSignal<string | null>(null)`; the fallback renders `<form class="auth-form" onSubmit={submit}>` with: `<h2>` text `Create account` (signup) / `Sign in` (signin); a Name field only when `mode() === "signup"` — `<label>Name<input type="text" required value={name()} onInput={...} /></label>`; `<label>Email<input type="email" required .../></label>`; `<label>Password<input type="password" required minlength={8} .../></label>`; `<Show when={formError()}>{(m) => <p class="form-error">{m()}</p>}</Show>`; a submit button text `Sign up` (signup) / `Sign in` (signin); a toggle button text `Need an account? Sign up` (signin) / `Have an account? Sign in` (signup) whose `onClick` flips `mode`; `submit` runs `event.preventDefault()` then signup → `const { error } = await authClient.signUp.email({ name: name(), email: email(), password: password() })`, signin → `const { error } = await authClient.signIn.email({ email: email(), password: password() })`; on `error`: `setFormError(error.message)`; on success: clear `name`/`email`/`password`, `setMode("signin")`, then `affects(props.session); void refresh(props.session);` — the same refetch pattern the existing `signOut` uses (better-auth's vanilla client also toggles its session signal on auth actions, but the Solid memo holds a stale promise, hence the explicit refresh); `signOut` and the signed-in block (`Signed in as {user().name ?? user().email}`, `Sign out` button) stay as-is; commands: `pnpm nx run @acme/web:check`
 
-- [ ] 3. Build the Expo form in `MobileAuth` (`apps/expo/src/app/index.tsx`) — requirements: React Native `useState` (from `react`, already imported): `mode` (`"signin" | "signup"`, default `"signin"`), `name`, `email`, `password`, `error` (string|null); when `session` is falsy render the existing `Not logged in` greeting text, then (signup mode only) a `TextInput` for name, `TextInput`s for email and password (`secureTextEntry`, `autoCapitalize="none"`), reusing the existing input className `border-input bg-background text-foreground items-center rounded-md border px-3 text-lg leading-tight`; an error `<Text className="text-destructive">` when `error` (reuse `CreatePost`'s error-text styling); a submit `Pressable` labeled `Sign up`/`Sign in`; a toggle `Pressable` labeled `Need an account? Sign up` / `Have an account? Sign in` flipping `mode`; submit runs `const { error } = mode === "signup" ? await authClient.signUp.email({ name, email, password }) : await authClient.signIn.email({ email, password });` → on `error` `setError(error.message)`; on success clear the fields, `setMode("signin")`, `setError(null)` — the `authClient.useSession()` hook refreshes automatically (the client toggles its `$sessionSignal` after matched auth actions — verified in `better-auth/dist/client/proxy.mjs`'s onSuccess listener dispatch); when `session` is truthy: greeting + `Sign Out` `Pressable` (as today); form and greeting are mutually exclusive; commands: `pnpm nx run @acme/expo:typecheck`
+- [x] 3. Build the Expo form in `MobileAuth` (`apps/expo/src/app/index.tsx`) — requirements: React Native `useState` (from `react`, already imported): `mode` (`"signin" | "signup"`, default `"signin"`), `name`, `email`, `password`, `error` (string|null); when `session` is falsy render the existing `Not logged in` greeting text, then (signup mode only) a `TextInput` for name, `TextInput`s for email and password (`secureTextEntry`, `autoCapitalize="none"`), reusing the existing input className `border-input bg-background text-foreground items-center rounded-md border px-3 text-lg leading-tight`; an error `<Text className="text-destructive">` when `error` (reuse `CreatePost`'s error-text styling); a submit `Pressable` labeled `Sign up`/`Sign in`; a toggle `Pressable` labeled `Need an account? Sign up` / `Have an account? Sign in` flipping `mode`; submit runs `const { error } = mode === "signup" ? await authClient.signUp.email({ name, email, password }) : await authClient.signIn.email({ email, password });` → on `error` `setError(error.message)`; on success clear the fields, `setMode("signin")`, `setError(null)` — the `authClient.useSession()` hook refreshes automatically (the client toggles its `$sessionSignal` after matched auth actions — verified in `better-auth/dist/client/proxy.mjs`'s onSuccess listener dispatch); when `session` is truthy: greeting + `Sign Out` `Pressable` (as today); form and greeting are mutually exclusive; commands: `pnpm nx run @acme/expo:typecheck`
 
 ## 2. No-go
 
@@ -40,12 +40,12 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 *All boxes checked = spec done.*
 
-- [ ] `pnpm lint && pnpm format && pnpm typecheck` exit 0 (repo root).
-- [ ] objective 1: `grep -n "emailAndPassword\|requireEmailVerification\|autoSignIn\|sendResetPassword\|sendVerificationEmail" packages/auth/src/index.ts` shows only the `emailAndPassword` literal — the other four names never appear.
-- [ ] objective 2 server smoke (better-auth still auto-migrates at boot until spec 13): `pnpm --filter @acme/server dev` boots clean; `curl -s -i -X POST http://localhost:3000/api/auth/sign-up/email -H 'content-type: application/json' -d '{"name":"Ada","email":"ada@example.com","password":"password1234"}'` → `200` with a `set-cookie: better-auth.session_token=…` header; `GET /api/auth/get-session` with that cookie → `200` and `user.email === "ada@example.com"`; `POST /api/auth/sign-in/email` with `wrong-password` → not ok, body `code === "INVALID_EMAIL_OR_PASSWORD"`; `POST /api/auth/sign-out` with the cookie → ok.
-- [ ] objective 2 web form (manual browser — automation lands in spec 14): with the server running and `pnpm --filter @acme/web dev` serving http://localhost:3001: the fallback shows the sign-in form; the toggle switches to `Create account` with the Name field; sign up `web@example.com`/`password1234` → `Signed in as …`; `Sign out` → the form returns; sign in with `wrong-password` → `.form-error` text matches `/invalid/i`; every label/button matches objective 2 exactly.
-- [ ] objective 3 Expo manual smoke (no simulator in CI — plan Verification 5): `cd apps/expo && CI=false pnpm exec expo start --ios --go` with the server running: sign up `mobile@example.com`/`password1234` → greeting shows the name; create a post → it appears in the list; `Sign Out` → the form returns.
-- [ ] every objective in section 1 is checked (divergences, if any, appended here).
+- [x] `pnpm lint && pnpm format && pnpm typecheck` exit 0 (repo root).
+- [x] objective 1: `grep -n "emailAndPassword\|requireEmailVerification\|autoSignIn\|sendResetPassword\|sendVerificationEmail" packages/auth/src/index.ts` shows only the `emailAndPassword` literal — the other four names never appear.
+- [x] objective 2 server smoke (better-auth still auto-migrates at boot until spec 13): `pnpm --filter @acme/server dev` boots clean; `curl -s -i -X POST http://localhost:3000/api/auth/sign-up/email -H 'content-type: application/json' -d '{"name":"Ada","email":"ada@example.com","password":"password1234"}'` → `200` with a `set-cookie: better-auth.session_token=…` header; `GET /api/auth/get-session` with that cookie → `200` and `user.email === "ada@example.com"`; `POST /api/auth/sign-in/email` with `wrong-password` → not ok, body `code === "INVALID_EMAIL_OR_PASSWORD"`; `POST /api/auth/sign-out` with the cookie → ok.
+- [x] objective 2 web form (manual browser — automation lands in spec 14): with the server running and `pnpm --filter @acme/web dev` serving http://localhost:3001: the fallback shows the sign-in form; the toggle switches to `Create account` with the Name field; sign up `web@example.com`/`password1234` → `Signed in as …`; `Sign out` → the form returns; sign in with `wrong-password` → `.form-error` text matches `/invalid/i`; every label/button matches objective 2 exactly.
+- [x] objective 3 Expo manual smoke (no simulator in CI — plan Verification 5): `cd apps/expo && CI=false pnpm exec expo start --ios --go` with the server running: sign up `mobile@example.com`/`password1234` → greeting shows the name; create a post → it appears in the list; `Sign Out` → the form returns.
+- [x] every objective in section 1 is checked (divergences, if any, appended here).
 
 ## 4. Divergences
 
@@ -56,7 +56,7 @@ why, the fix attempt(s), and (if unresolved) a pointer to a tracking file. Keep
 the `- [ ]` testing-criteria box unchecked and note the divergence inline next
 to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
-- [ ] every divergence found is appended below (or the section reads "None.")
+- [x] every divergence found is appended below (or the section reads "None.")
 
 *Format (one numbered item per divergence):*
 
@@ -67,7 +67,56 @@ to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
 ### Divergences
 
-None.
+1. The spec-literal `setFormError(error.message)` / `setError(error.message)`
+   does not typecheck: better-auth types `error.message` as
+   `string | undefined`, while the signals are `string | null`. Current state:
+   both clients use
+   `error.message ?? "Authentication failed"` — the fallback only shows when
+   better-auth omits the message (Verified 2026-10-28: 2 fix attempts — plain
+   assignment, then the `?? "Authentication failed"` coalesce — fenced by
+   better-auth 1.7.12's error type; no observable change for real errors: the
+   wrong-password message `Invalid email or password` still renders and
+   matches `/invalid/i`.)
+2. The server-smoke sign-out curl as written
+   (`POST /api/auth/sign-out` with only the cookie) returns
+   `403 {"code":"MISSING_OR_NULL_ORIGIN"}`, not `ok`. Current state: adding
+   `-H 'origin: http://localhost:3001'` to the same curl returns
+   `200 {"success":true}` (Verified 2026-10-28: 2 fix attempts — bare cookie
+   → 403, cookie + Origin header → 200 — fenced by better-auth's origin/CSRF
+   middleware, which validates Origin on every cookie-bearing POST; browsers
+   send Origin on cross-origin POSTs, so the product path is unaffected.)
+3. The Expo sign-up was rejected with `403 INVALID_ORIGIN` for
+   `exp://192.168.100.23:8081` when the server was started exactly as
+   `pnpm --filter @acme/server dev`: `@better-auth/expo`'s plugin `init`
+   only contributes `exp://` to `trustedOrigins` when
+   `NODE_ENV === "development"`, and neither `pnpm` nor `bun --watch` sets
+   `NODE_ENV`, while the config's `expo://` does not match Expo Go's `exp://`
+   origin. Fix attempts (Verified 2026-10-28): plain dev command →
+   `INVALID_ORIGIN`, same command with `NODE_ENV=development` → trusted (full
+   iOS smoke passed) — the `trustedOrigins` edit was fenced by objective 1's
+   "Nothing else" and the env-schema route by the No-go rule. Current state:
+   resolved by setting
+   `"dev": "NODE_ENV=development bun --watch src/index.ts"` in
+   `apps/server/package.json` — a dev-script edit outside both fences, so no
+   spec amendment was needed (Verified 2026-10-28: the plain documented
+   `pnpm --filter @acme/server dev` now boots with `NODE_ENV=development`;
+   sign-up with `origin: exp://localhost` → 200, sign-up via the
+   `expo-origin: exp://192.168.100.23:8081` header → 200, hostile
+   `origin: https://evil.example` → 403, and the objective-2 no-Origin
+   sign-up still returns 200 with `set-cookie`; the Expo Go manual smoke with
+   the plain command signs up `expo-smoke-20261028@example.com` → greeting
+   `Hello, Expo Smoke`, and `Sign Out` returns the form, with no
+   `INVALID_ORIGIN` in the server log; `pnpm lint && pnpm format &&
+   pnpm typecheck` and `pnpm --filter @acme/server test` exit 0.)
+4. `pnpm nx run @acme/web:check` (objective 2's command) was already red
+   before this spec: `src/routes/users/*` imported the gitignored
+   `apps/web/src/data/users.json`, which was missing from the workspace.
+   **Resolved 2026-10-28:** the fixture moved to the non-ignored path
+   `apps/web/src/lib/users.json` and the two route imports now point there
+   (`git check-ignore` confirms the new path is trackable). Verified:
+   `pnpm nx run @acme/web:check` succeeds and `pnpm lint && pnpm format &&
+   pnpm typecheck` exit 0 from a state where the old `src/data/` no longer
+   exists. Tracking file removed.
 
 ### Unresolved divergences → `specs/divergencies/`
 

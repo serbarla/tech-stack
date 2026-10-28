@@ -5,39 +5,24 @@ import type {
 } from "better-auth";
 import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
-import { getMigrations } from "better-auth/db/migration";
-import { oAuthProxy } from "better-auth/plugins";
 import { DatabaseSync } from "node:sqlite";
 
+// eslint-disable-next-line @typescript-eslint/require-await -- initAuth stays async per spec 13 (signature unchanged).
 export async function initAuth<
   TExtraPlugins extends BetterAuthPlugin[] = [],
 >(options: {
   baseUrl: string;
-  productionUrl: string;
   databaseUrl: string;
   secret: string | undefined;
-
-  discordClientId: string;
-  discordClientSecret: string;
   extraPlugins?: TExtraPlugins;
 }): Promise<Auth> {
   const config: BetterAuthOptions = {
     database: new DatabaseSync(options.databaseUrl),
     baseURL: options.baseUrl,
     secret: options.secret,
-    plugins: [
-      oAuthProxy({
-        productionURL: options.productionUrl,
-      }),
-      expo(),
-      ...(options.extraPlugins ?? []),
-    ],
-    socialProviders: {
-      discord: {
-        clientId: options.discordClientId,
-        clientSecret: options.discordClientSecret,
-        redirectURI: `${options.productionUrl}/api/auth/callback/discord`,
-      },
+    plugins: [expo(), ...(options.extraPlugins ?? [])],
+    emailAndPassword: {
+      enabled: true,
     },
     trustedOrigins: ["expo://", "http://localhost:3001"],
     onAPIError: {
@@ -47,11 +32,9 @@ export async function initAuth<
     },
   };
 
-  // better-auth validates the schema as soon as it initializes, so create the
-  // tables first: a fresh database would otherwise log "Database schema
-  // mismatch" before the auth routes are ready.
-  const { runMigrations } = await getMigrations(config);
-  await runMigrations();
+  // Auth tables are created by packages/db migrations (pnpm db:migrate); run
+  // them before boot, same contract as the post table. A fresh unmigrated DB
+  // logs better-auth's "Database schema mismatch" until then.
 
   const auth = betterAuth(config);
 

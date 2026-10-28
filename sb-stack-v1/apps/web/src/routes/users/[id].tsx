@@ -1,7 +1,7 @@
 import { Title } from "@solidjs/meta";
 import { query, type RouteDefinition, type RouteProps } from "@solidjs/router";
 import { createMemo, isPending } from "solid-js";
-import users from "../../data/users.json";
+import users from "../../lib/users.json";
 import { paths } from "../../router";
 
 // Async data loading: a query (cached per key) read through a memo — the

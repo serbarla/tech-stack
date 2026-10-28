@@ -1,6 +1,6 @@
 import { Title } from "@solidjs/meta";
 import { For } from "solid-js";
-import users from "../../data/users.json";
+import users from "../../lib/users.json";
 import { paths } from "../../router";
 
 // The layout's index page: what /users itself renders inside users.tsx.

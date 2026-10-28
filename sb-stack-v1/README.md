@@ -13,7 +13,7 @@ A T3-style monorepo orchestrated by [Nx](https://nx.dev) (the `package-json` plu
 Current stack:
 
 - **API**: [Elysia](https://elysiajs.com) on Bun, consumed by clients through [Eden](https://elysiajs.com/eden) treaties (fully typesafe, no code generation)
-- **Auth**: [better-auth](https://www.better-auth.com) mounted directly into the Elysia app, with the oAuthProxy and Expo plugins
+- **Auth**: [better-auth](https://www.better-auth.com) mounted directly into the Elysia app, with the Expo plugin
 - **Database**: SQLite via `node:sqlite`, accessed through [MikroORM 7](https://mikro-orm.io) with a [Kysely](https://kysely.dev) escape hatch (`orm.em.getKysely()`)
 - **Web**: SolidJS (`solid-js` 2.0 rc) + Vite Plus + filesystem routing + Tailwind CSS v4
 - **Mobile**: Expo SDK 58, React Native 0.88 / React 19, Expo Router, Uniwind (Tailwind v4), TanStack Query
@@ -43,7 +43,7 @@ packages
   ├─ api
   │   └─ Elysia app factory (`createApp`) + routes; exports the `App` type for Eden
   ├─ auth
-  │   └─ better-auth on node:sqlite; oAuthProxy + Expo plugins, Discord provider
+  │   └─ better-auth on node:sqlite; email & password, Expo plugin
   ├─ db
   │   └─ MikroORM 7 (SqliteDriver + NodeSqliteDialect), entities, migrations, Kysely
   ├─ ui
@@ -101,7 +101,6 @@ Environment variables (see `.env.schema`):
 | `BETTER_AUTH_URL` | Public URL of the Elysia server (better-auth base URL) |
 | `PORT` | Server port (default `3000`) |
 | `AUTH_SECRET` | better-auth secret (`openssl rand -base64 32`) |
-| `AUTH_DISCORD_ID` / `AUTH_DISCORD_SECRET` | Preconfigured Discord OAuth provider |
 | `VITE_API_URL` | Base URL the web app uses to reach the API (default `http://localhost:3000`) |
 
 ### 2. Auth schema
@@ -116,7 +115,7 @@ The repo ships a small Post CRUD demo wired end-to-end:
 - `POST /api/posts`, `DELETE /api/posts/:id` — require a session (`auth: true` middleware), validated with `CreatePostSchema`
 - `GET /api/protected` — auth-gated sample
 
-Both the web and Expo apps sign in (Discord OAuth or better-auth's email flows via `authClient`) and render the post list with TanStack Query.
+Both the web and Expo apps sign in with email and password via `authClient` and render the post list.
 
 ### 4. Configure Expo `dev`-script
 
@@ -183,7 +182,7 @@ docker compose up --build
 - **server**: Bun image; runs `mikro-orm migration:up` at boot, then serves Elysia on port 3000. SQLite persists in the `./data` volume (`/data/sqlite.db`).
 - **web**: builds `@acme/web` with `pnpm nx run @acme/web:build` and serves the static bundle via nginx on port 3001.
 
-Auth env vars (`AUTH_SECRET`, `AUTH_DISCORD_ID`, `AUTH_DISCORD_SECRET`) are read from your shell/`.env` by compose.
+Auth env vars (`AUTH_SECRET`) are read from your shell/`.env` by compose.
 
 ## CI
 

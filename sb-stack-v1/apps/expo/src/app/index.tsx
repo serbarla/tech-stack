@@ -96,25 +96,98 @@ function CreatePost() {
 function MobileAuth() {
   const { data: session } = authClient.useSession();
 
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    const { error: authError } =
+      mode === "signup"
+        ? await authClient.signUp.email({ name, email, password })
+        : await authClient.signIn.email({ email, password });
+    if (authError) {
+      // better-auth types `message` as optional; surface a fallback if absent.
+      setError(authError.message ?? "Authentication failed");
+      return;
+    }
+    setName("");
+    setEmail("");
+    setPassword("");
+    setMode("signin");
+    setError(null);
+  };
+
+  if (session) {
+    return (
+      <>
+        <Text className="text-foreground pb-2 text-center text-xl font-semibold">
+          {session.user.name ? `Hello, ${session.user.name}` : "Not logged in"}
+        </Text>
+        <Pressable
+          onPress={() => void authClient.signOut()}
+          className="bg-primary flex items-center rounded-sm p-2"
+        >
+          <Text className="text-foreground">Sign Out</Text>
+        </Pressable>
+      </>
+    );
+  }
+
   return (
-    <>
+    <View className="flex gap-2">
       <Text className="text-foreground pb-2 text-center text-xl font-semibold">
-        {session?.user.name ? `Hello, ${session.user.name}` : "Not logged in"}
+        Not logged in
       </Text>
+      {mode === "signup" && (
+        <TextInput
+          className="border-input bg-background text-foreground items-center rounded-md border px-3 text-lg leading-tight"
+          value={name}
+          onChangeText={setName}
+          placeholder="Name"
+          autoCapitalize="none"
+        />
+      )}
+      <TextInput
+        className="border-input bg-background text-foreground items-center rounded-md border px-3 text-lg leading-tight"
+        value={email}
+        onChangeText={setEmail}
+        placeholder="Email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        className="border-input bg-background text-foreground items-center rounded-md border px-3 text-lg leading-tight"
+        value={password}
+        onChangeText={setPassword}
+        placeholder="Password"
+        secureTextEntry
+        autoCapitalize="none"
+      />
+      {error && <Text className="text-destructive mt-2">{error}</Text>}
       <Pressable
-        onPress={() =>
-          session
-            ? authClient.signOut()
-            : authClient.signIn.social({
-                provider: "discord",
-                callbackURL: "/",
-              })
-        }
+        onPress={() => void submit()}
         className="bg-primary flex items-center rounded-sm p-2"
       >
-        <Text>{session ? "Sign Out" : "Sign In With Discord"}</Text>
+        <Text className="text-foreground">
+          {mode === "signup" ? "Sign up" : "Sign in"}
+        </Text>
       </Pressable>
-    </>
+      <Pressable
+        onPress={() => {
+          setError(null);
+          setMode(mode === "signup" ? "signin" : "signup");
+        }}
+        className="flex items-center rounded-sm p-2"
+      >
+        <Text className="text-foreground">
+          {mode === "signup"
+            ? "Have an account? Sign in"
+            : "Need an account? Sign up"}
+        </Text>
+      </Pressable>
+    </View>
   );
 }
 
