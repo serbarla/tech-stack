@@ -69,3 +69,29 @@ jobs:
 
       - name: Check web
         run: pnpm nx run @acme/web:check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Integration tests
+        run: pnpm --filter @acme/server test
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: apps/web
+
+      - name: Web e2e
+        run: pnpm --filter @acme/web e2e

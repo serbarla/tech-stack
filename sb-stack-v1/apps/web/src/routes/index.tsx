@@ -17,9 +17,11 @@ type SessionResult = Awaited<ReturnType<typeof authClient.getSession>>;
 type PostsResult = Awaited<ReturnType<typeof api.api.posts.get>>;
 
 function AuthShowcase(props: { session: SourceAccessor<SessionResult> }) {
-  const signIn = () => {
-    void authClient.signIn.social({ provider: "discord", callbackURL: "/" });
-  };
+  const [mode, setMode] = createSignal<"signin" | "signup">("signin");
+  const [name, setName] = createSignal("");
+  const [email, setEmail] = createSignal("");
+  const [password, setPassword] = createSignal("");
+  const [formError, setFormError] = createSignal<string | null>(null);
 
   const signOut = () => {
     void authClient.signOut().then(() => {
@@ -28,14 +30,82 @@ function AuthShowcase(props: { session: SourceAccessor<SessionResult> }) {
     });
   };
 
+  const submit = async (event: Event) => {
+    event.preventDefault();
+    const { error } =
+      mode() === "signup"
+        ? await authClient.signUp.email({
+            name: name(),
+            email: email(),
+            password: password(),
+          })
+        : await authClient.signIn.email({
+            email: email(),
+            password: password(),
+          });
+    if (error) {
+      // better-auth types `message` as optional; surface a fallback if absent.
+      setFormError(error.message ?? "Authentication failed");
+      return;
+    }
+    setFormError(null);
+    setName("");
+    setEmail("");
+    setPassword("");
+    setMode("signin");
+    affects(props.session);
+    void refresh(props.session);
+  };
+
   return (
     <section class="auth">
       <Show
         when={props.session().data?.user}
         fallback={
-          <button type="button" onClick={signIn}>
-            Sign in with Discord
-          </button>
+          <form class="auth-form" onSubmit={submit}>
+            <h2>{mode() === "signup" ? "Create account" : "Sign in"}</h2>
+            <Show when={mode() === "signup"}>
+              <label>
+                Name
+                <input
+                  type="text"
+                  required
+                  value={name()}
+                  onInput={(e) => setName(e.currentTarget.value)}
+                />
+              </label>
+            </Show>
+            <label>
+              Email
+              <input
+                type="email"
+                required
+                value={email()}
+                onInput={(e) => setEmail(e.currentTarget.value)}
+              />
+            </label>
+            <label>
+              Password
+              <input
+                type="password"
+                required
+                minlength={8}
+                value={password()}
+                onInput={(e) => setPassword(e.currentTarget.value)}
+              />
+            </label>
+            <Show when={formError()}>{(m) => <p class="form-error">{m()}</p>}</Show>
+            <button type="submit">{mode() === "signup" ? "Sign up" : "Sign in"}</button>
+            <button
+              type="button"
+              onClick={() => {
+                setFormError(null);
+                setMode(mode() === "signup" ? "signin" : "signup");
+              }}
+            >
+              {mode() === "signup" ? "Have an account? Sign in" : "Need an account? Sign up"}
+            </button>
+          </form>
         }
       >
         {(user) => (

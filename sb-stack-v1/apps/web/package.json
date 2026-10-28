@@ -7,6 +7,7 @@
     "build": "vp build",
     "check": "vp check",
     "test": "vp test",
+    "e2e": "playwright test",
     "clean": "git clean -xdf .cache node_modules dist"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@acme/api": "workspace:*",
     "@acme/tsconfig": "workspace:*",
+    "@playwright/test": "^1.64.1",
     "@solidjs/diagnostics": "^2.0.0-rc.17",
     "@solidjs/meta": "^1.0.0-next.2",
     "@solidjs/testing-library": "^1.0.0-beta.3",

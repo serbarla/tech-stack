@@ -6,7 +6,7 @@ Nx + pnpm monorepo (T3-style); every `package.json` script is an Nx target. Bun 
 - `apps/web` — SolidJS 2.0 + Vite Plus, port 3001; filesystem routing, Tailwind v4, Eden Treaty client.
 - `apps/expo` — Expo SDK 58 / RN 0.88, Expo Router. Use `expo start --ios --go` (dev client is installed, so plain `--ios` expects a dev build); empty `CI=` breaks the CLI, use `CI=false`.
 - `packages/api` — `createApp()` factory + post routes; clients import only its `App` type.
-- `packages/auth` — better-auth on node:sqlite; Discord OAuth only (unconfigured in dev → sign-in returns 500), oAuthProxy + Expo plugins.
+- `packages/auth` — better-auth on node:sqlite; email & password only (no email sending), Expo plugin.
 - `packages/db` — MikroORM 7 + Kysely escape hatch; SQLite file `data/sqlite.db` resolved by `getDatabasePath()`.
 - `packages/validators` — shared zod v4 schemas. `packages/ui` is React/shadcn and unused by web.
 

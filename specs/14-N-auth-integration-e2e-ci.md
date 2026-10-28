@@ -15,9 +15,9 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 ## 1. Objectives
 
-- [ ] 1. Wire the `bun test` harness in `apps/server` — requirements: `apps/server/package.json` gains `"test": "bun test"`; `apps/server/tsconfig.json` `include` (currently `["src", "env.d.ts"]`) gains `"test"` so the suite is typechecked; `apps/server/eslint.config.ts` appends a config block `{ files: ["test/**"], rules: { "no-restricted-properties": "off" } }` (the `restrictEnvAccess` rule forbids `process.env`, which the test bootstrap needs); contingency: if lint still flags `process.env` inside `apps/server/test/**` despite the override, replace the override with a single `// eslint-disable-next-line no-restricted-properties` on the assignment line — behavior unchanged; commands: `pnpm nx run @acme/server:typecheck`
+- [x] 1. Wire the `bun test` harness in `apps/server` — requirements: `apps/server/package.json` gains `"test": "bun test"`; `apps/server/tsconfig.json` `include` (currently `["src", "env.d.ts"]`) gains `"test"` so the suite is typechecked; `apps/server/eslint.config.ts` appends a config block `{ files: ["test/**"], rules: { "no-restricted-properties": "off" } }` (the `restrictEnvAccess` rule forbids `process.env`, which the test bootstrap needs); contingency: if lint still flags `process.env` inside `apps/server/test/**` despite the override, replace the override with a single `// eslint-disable-next-line no-restricted-properties` on the assignment line — behavior unchanged; commands: `pnpm nx run @acme/server:typecheck`
 
-- [ ] 2. Write the integration suite `apps/server/test/auth-flow.test.ts` (uses `bun:test`; `@types/bun` is already in `apps/server` devDeps) — requirements: `beforeAll` sets `process.env.DATABASE_URL` to a fresh throwaway path (`join(mkdtempSync(join(tmpdir(), "acme-auth-test-")), "test.db")`), runs the real migration command `Bun.spawnSync(["pnpm", "db:migrate"], { cwd: <workspace root = new URL("../../..", import.meta.url)>, env: { ...process.env, DATABASE_URL: <same path> }, stdout: "inherit", stderr: "inherit" })` and asserts `exitCode === 0` (varlock passes explicit env through — verified; `migration:up` is `cache: false` in `nx.json` — verified), then `initDb()` (from `@acme/db`), `initAuth<BetterAuthPlugin[]>({ baseUrl: "http://localhost:3000", databaseUrl: getDatabasePath(), secret: "test-secret" })` (the frozen explicit type argument of spec 05 divergence 1 — a plain `initAuth({...})` does not typecheck against `createApp`'s `auth: Auth` parameter), and `createApp({ auth, orm })`; `afterAll` closes the ORM (`orm.close()`); the request helper is `app.handle(new Request("http://localhost:3000" + path, init))` — no socket listen, Playwright covers the wire; the cookie helper extracts `set-cookie` via `res.headers.getSetCookie().map(c => c.split(";")[0]).join("; ")` and replays it as a `cookie` request header; fresh DB in `beforeAll`, one shared user per case where noted; test cases:
+- [x] 2. Write the integration suite `apps/server/test/auth-flow.test.ts` (uses `bun:test`; `@types/bun` is already in `apps/server` devDeps) — requirements: `beforeAll` sets `process.env.DATABASE_URL` to a fresh throwaway path (`join(mkdtempSync(join(tmpdir(), "acme-auth-test-")), "test.db")`), runs the real migration command `Bun.spawnSync(["pnpm", "db:migrate"], { cwd: <workspace root = new URL("../../..", import.meta.url)>, env: { ...process.env, DATABASE_URL: <same path> }, stdout: "inherit", stderr: "inherit" })` and asserts `exitCode === 0` (varlock passes explicit env through — verified; `migration:up` is `cache: false` in `nx.json` — verified), then `initDb()` (from `@acme/db`), `initAuth<BetterAuthPlugin[]>({ baseUrl: "http://localhost:3000", databaseUrl: getDatabasePath(), secret: "test-secret" })` (the frozen explicit type argument of spec 05 divergence 1 — a plain `initAuth({...})` does not typecheck against `createApp`'s `auth: Auth` parameter), and `createApp({ auth, orm })`; `afterAll` closes the ORM (`orm.close()`); the request helper is `app.handle(new Request("http://localhost:3000" + path, init))` — no socket listen, Playwright covers the wire; the cookie helper extracts `set-cookie` via `res.headers.getSetCookie().map(c => c.split(";")[0]).join("; ")` and replays it as a `cookie` request header; fresh DB in `beforeAll`, one shared user per case where noted; test cases:
   1. **schema** — `orm.em.getConnection().execute("select name from sqlite_master where type = 'table'")` includes `user`, `session`, `account`, `verification`, `post`.
   2. **sign-up creates a session** — `POST /api/auth/sign-up/email` JSON `{"name":"Ada","email":"ada@example.com","password":"password1234"}` → `res.ok`; body `user.email === "ada@example.com"`; `set-cookie` contains `better-auth.session_token`; `GET /api/auth/get-session` with that cookie → `res.ok` and body user email matches.
   3. **protected route rejects anonymous** — `POST /api/posts` JSON `{"title":"t","content":"c"}` without cookie → status `401` (the `authed` macro's `status(401)` — repo-owned).
@@ -27,7 +27,7 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
   7. **sign-out** — `POST /api/auth/sign-out` with the cookie → `res.ok`; `GET /api/auth/get-session` afterwards has no user (`expect(json?.user ?? json?.data?.user ?? null).toBeNull()`).
   commands: `pnpm --filter @acme/server test`
 
-- [ ] 3. Wire Playwright into `@acme/web` — requirements: `pnpm --filter @acme/web add -D @playwright/test` (resolves current 1.x; single consumer — no catalog entry) and add `"e2e": "playwright test"` to `apps/web/package.json`; new `apps/web/playwright.config.ts` with exactly:
+- [x] 3. Wire Playwright into `@acme/web` — requirements: `pnpm --filter @acme/web add -D @playwright/test` (resolves current 1.x; single consumer — no catalog entry) and add `"e2e": "playwright test"` to `apps/web/package.json`; new `apps/web/playwright.config.ts` with exactly:
   ```ts
   import { defineConfig } from "@playwright/test";
 
@@ -54,12 +54,12 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
   ```
   (`getDatabasePath()` resolves the relative `DATABASE_URL` against the workspace root regardless of cwd; `data/` is gitignored; `/api/auth/ok` is the proven auth health endpoint from spec 05; a fresh DB each run makes the fixed fixture emails deterministic; `webServer` sequencing is order-independent — the migration happens inside the server's command chain); contingency: if `pnpm nx run @acme/web:check` (CI `check-web`) rejects the new `e2e/**`/`playwright.config.ts` files, exclude those paths in the tool that complains (tsconfig `exclude` or eslint ignores) — one line — then re-run; commands: `pnpm --filter @acme/web add -D @playwright/test`
 
-- [ ] 4. Write the Playwright spec `apps/web/e2e/auth.spec.ts` — requirements: two tests whose selectors match spec 12's form contract exactly:
+- [x] 4. Write the Playwright spec `apps/web/e2e/auth.spec.ts` — requirements: two tests whose selectors match spec 12's form contract exactly:
   1. `sign up, create a post, sign out` — `page.goto("/")` → click `getByRole("button", { name: "Need an account? Sign up" })` → fill `getByLabel("Name")` = `E2E User`, `getByLabel("Email")` = `e2e-1@example.com`, `getByLabel("Password")` = `password1234` → click `getByRole("button", { name: "Sign up", exact: true })` → expect `getByText(/Signed in as/)`. Then fill `getByLabel("Title")` = `Hello e2e`, `getByLabel("Content")` = `created by playwright` → click `getByRole("button", { name: "Create" })` → expect `.post-list` to contain `Hello e2e`. Then click `getByRole("button", { name: "Sign out" })` → expect `getByRole("button", { name: "Need an account? Sign up" })` visible and `getByRole("button", { name: "Create" })` hidden (the create form is gated on session).
   2. `sign in rejects a wrong password and accepts the right one` — `page.goto("/")` → click `Need an account? Sign up` → sign up `e2e-2@example.com` / `password1234` → `Sign out` (success resets mode to signin, so the sign-in form is showing) → fill `e2e-2@example.com` + `wrong-password` → click `getByRole("button", { name: "Sign in", exact: true })` → expect `.form-error` visible with text matching `/invalid/i`; then fill `password1234` → click `Sign in` → expect `getByText(/Signed in as/)`.
   commands: `pnpm --filter @acme/web e2e`
 
-- [ ] 5. Append the two CI jobs to `.github/workflows/ci.yml` — requirements: the shared `./tooling/github/setup` already installs pnpm, node, and bun (verified); append exactly:
+- [x] 5. Append the two CI jobs to `.github/workflows/ci.yml` — requirements: the shared `./tooling/github/setup` already installs pnpm, node, and bun (verified); append exactly:
   ```yaml
     test:
       runs-on: ubuntu-latest
@@ -96,11 +96,11 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 *All boxes checked = spec done.*
 
-- [ ] `pnpm lint && pnpm format && pnpm typecheck` exit 0 (repo root) — plan Verification 7 (the new test files are covered by `apps/server`'s tsconfig `include`; the e2e/config files typecheck under `apps/web`'s unrestricted tsconfig).
-- [ ] Integration suite (plan Verification 3): `pnpm --filter @acme/server test` → all seven cases pass (schema tables, sign-up→session→create post, 401 anonymous, sign-in wrong/right password, duplicate sign-up, sign-out). This is the regression test to keep.
-- [ ] Web e2e (plan Verification 4): after `cd apps/web && pnpm exec playwright install chromium`, `pnpm --filter @acme/web e2e` → 2 tests pass (sign-up → create post → sign-out hides the form; wrong password rejected, right password signed in).
-- [ ] objective 5: `.github/workflows/ci.yml` contains the `test` and `e2e` jobs exactly as specified (both `uses: ./tooling/github/setup`).
-- [ ] every objective in section 1 is checked (divergences, if any, appended here).
+- [x] `pnpm lint && pnpm format && pnpm typecheck` exit 0 (repo root) — plan Verification 7 (the new test files are covered by `apps/server`'s tsconfig `include`; the e2e/config files typecheck under `apps/web`'s unrestricted tsconfig).
+- [x] Integration suite (plan Verification 3): `pnpm --filter @acme/server test` → all seven cases pass (schema tables, sign-up→session→create post, 401 anonymous, sign-in wrong/right password, duplicate sign-up, sign-out). This is the regression test to keep.
+- [x] Web e2e (plan Verification 4): after `cd apps/web && pnpm exec playwright install chromium`, `pnpm --filter @acme/web e2e` → 2 tests pass (sign-up → create post → sign-out hides the form; wrong password rejected, right password signed in).
+- [x] objective 5: `.github/workflows/ci.yml` contains the `test` and `e2e` jobs exactly as specified (both `uses: ./tooling/github/setup`).
+- [x] every objective in section 1 is checked (divergences, if any, appended here).
 
 ## 4. Divergences
 
@@ -111,7 +111,7 @@ why, the fix attempt(s), and (if unresolved) a pointer to a tracking file. Keep
 the `- [ ]` testing-criteria box unchecked and note the divergence inline next
 to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
-- [ ] every divergence found is appended below (or the section reads "None.")
+- [x] every divergence found is appended below (or the section reads "None.")
 
 *Format (one numbered item per divergence):*
 
@@ -122,7 +122,11 @@ to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
 ### Divergences
 
-None.
+1. Objective 2 case 6's expected duplicate sign-up code `USER_ALREADY_EXISTS` does not exist in better-auth 1.7.12 — the real response is
+   `{"code":"USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"}`. Current state: the suite asserts the real code (with a comment citing this entry). (Verified 2026-10-28: 1 fix attempt — assert the actual code — fenced by the No-go rule against changing better-auth config or app behavior to fit the tests; the divergence is spec text vs the library's actual response, not a product bug.)
+2. Objective 2 case 7 as written (`POST /api/auth/sign-out` with the cookie, no Origin header) hits better-auth's origin/CSRF middleware and returns `403 MISSING_OR_NULL_ORIGIN`, not `res.ok` — the same root cause as spec 12 divergence 2. Current state: the test request sends `origin: http://localhost:3001`, mirroring what the browser does on every cross-origin POST; sign-out then returns 200 and the get-session body is `null`-tolerant (`json?.data?.user ?? json?.user ?? null`) per the spec's own optional chaining. (Verified 2026-10-28: 2 fix attempts — cookie-only POST → 403, cookie + Origin → 200 — fenced by better-auth's CSRF middleware, which no spec may reconfigure.)
+3. The spec-literal `Bun.spawnSync(["pnpm", "db:migrate"], { cwd: new URL("../../..", import.meta.url) })` fails on Bun 1.4.4: the URL object is stringified to an invalid `"file://…"` path, so `posix_spawn` fails with `ENOENT: 'pnpm'`. Current state: `cwd: fileURLToPath(new URL("../../..", import.meta.url))` — the same workspace root passed as a path string. (Verified 2026-10-28: 2 fix attempts — URL passed directly, then `fileURLToPath` — both fenced by Bun 1.4.4's `cwd` handling of URL values; observable behavior unchanged, `exitCode === 0` assertion intact.)
+4. Objective 2 case 1's row typing: `execute<{ name: string }>(...)` satisfies neither checker — tsc rejects the annotated-callback fix (`TS2345` on MikroORM's `EntityData<Partial<any>>` element type) and eslint's typed rules reject the untyped result (`no-unsafe-*` on `r.name`), while the `as { name: string }[]` cast trips `no-unnecessary-type-assertion` under eslint's program. Current state: the spec-literal untyped `execute(...)` plus `expect(rows.some((r) => r.name === table)).toBe(true)` per table — the comparison uses no unsafe return, and both checkers pass. (Verified 2026-10-28: 3 fix attempts — generic argument, then the `as` cast, then the annotated `map` callback — all fenced by the tsc/eslint type-resolution disagreement on MikroORM 7's row type; the observable assertion — the five tables are present — is unchanged.)
 
 ### Unresolved divergences → `specs/divergencies/`
 

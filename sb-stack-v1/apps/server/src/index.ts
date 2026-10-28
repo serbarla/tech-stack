@@ -10,11 +10,8 @@ import { getDatabasePath, initDb } from "@acme/db";
 const orm = await initDb();
 const auth = await initAuth<BetterAuthPlugin[]>({
   baseUrl: ENV.BETTER_AUTH_URL,
-  productionUrl: ENV.BETTER_AUTH_URL,
   databaseUrl: getDatabasePath(),
   secret: ENV.AUTH_SECRET,
-  discordClientId: ENV.AUTH_DISCORD_ID ?? "",
-  discordClientSecret: ENV.AUTH_DISCORD_SECRET ?? "",
 });
 
 createApp({ auth, orm }).listen(ENV.PORT, () => {
