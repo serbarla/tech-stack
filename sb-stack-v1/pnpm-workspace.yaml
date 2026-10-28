@@ -19,7 +19,7 @@ catalog:
   better-auth: ^1.7.11
   elysia: ^1.2.0
   eslint: ^9.38.0
-  kysely: ^0.28.0
+  kysely: ^0.28.17
   prettier: ^3.6.2
   solid-js: ^2.0.0-rc
   tailwindcss: ^4.1.16
@@ -42,8 +42,49 @@ onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - esbuild
 
+# Security pins for `pnpm audit --audit-level high` (spec 18-R).
+# `pnpm audit` flags transitive dev-tooling deps (expo CLI, metro, nx, next
+# optional peer of better-auth, eslint chains) that no workspace manifest
+# can bump directly. Each entry targets a specific advisory floor; keys with
+# a version selector only pin the requested lines that are actually
+# vulnerable, so unaffected major lines (e.g. brace-expansion@5, ws@8.22)
+# stay as-is.
 overrides:
   '@types/minimatch': 5.1.2
+  '@xmldom/xmldom': 0.8.15
+  'brace-expansion@<2.0.0': 1.1.20
+  'brace-expansion@^2.0.0': 2.1.6
+  browserslist: 4.28.7
+  compression: 1.8.2
+  defu: 6.1.5
+  # @tanstack/start-server-core pulls h3 under the alias `h3-v2`
+  # (npm:h3@2.0.0-beta.4); a bare `h3` key does not rewrite aliased specs.
+  h3: 2.0.1-rc.15
+  'h3-v2': 'npm:h3@2.0.1-rc.15'
+  'js-yaml@<4.0.0': 3.15.2
+  'js-yaml@^4.0.0': 4.3.2
+  'minimatch@<4.0.0': 3.1.4
+  'minimatch@^9.0.0': 9.0.7
+  mysql2: 3.22.0
+  next: 16.4.1
+  # CVE-2026-85393 (GHSA-86w9-cpqp-85rv) affects node-forge <=1.4.0; the fix
+  # shipped in 1.4.1/1.4.2 (2026-10-27). The advisory's "patched" field still
+  # reads <0.0.0 (registry DB lag), but 1.4.2 sits outside the vulnerable
+  # range, so pnpm audit passes.
+  node-forge: 1.4.2
+  'picomatch@<3.0.0': 2.3.2
+  'picomatch@^4.0.0': 4.0.7
+  postcss: 8.5.31
+  'seroval@<1.7.0': 1.6.3
+  shell-quote: 1.11.0
+  source-map-js: 1.2.2
+  undici: 7.30.1
+  'ws@<8.0.0': 7.5.11
+  'ws@^8.0.0': 8.22.0
+  # zod has no patched 3.x release for GHSA advisory covering <4.6.6;
+  # 4.x keeps the classic API for the config-validation use in @expo/cli
+  # and @tanstack plugins. Verified with pnpm build + expo export (18-R).
+  'zod@<4.0.0': 4.6.7
 
 publicHoistPattern:
   - '@ianvs/prettier-plugin-sort-imports'
