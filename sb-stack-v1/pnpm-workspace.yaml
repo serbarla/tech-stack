@@ -7,6 +7,10 @@ catalog:
   '@better-auth/expo': ^1.7.11
   '@elysiajs/cors': ^1.2.0
   '@elysiajs/eden': ^1.2.0
+  # Pinned: swagger >=1.1 depends on @scalar/* which calls zod v3's
+  # z.function().returns; the zod<4 security override (spec 18-R) forces
+  # zod 4.6.7 where that API is gone, so 1.1+ crashes at boot.
+  '@elysiajs/swagger': 1.0.5
   '@eslint/js': ^9.38.0
   '@mikro-orm/cli': ^7.2.5
   '@mikro-orm/core': ^7.2.5

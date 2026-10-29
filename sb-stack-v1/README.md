@@ -46,8 +46,6 @@ packages
   │   └─ better-auth on node:sqlite; email & password, Expo plugin
   ├─ db
   │   └─ MikroORM 7 (SqliteDriver + NodeSqliteDialect), entities, migrations, Kysely
-  ├─ ui
-  │   └─ shadcn-ui component library (React-based; currently not consumed by the Solid web app)
   └─ validators
       └─ Shared zod v4 schemas (e.g. `CreatePostSchema`)
 tooling
@@ -157,36 +155,42 @@ By using the proxy plugin, your server will forward any auth requests to the pro
 
 You can alternatively add your local IP (e.g. `192.168.x.y:$PORT`) to your OAuth provider. This may not be as reliable as your local IP may change when you change networks. Some OAuth providers may also only support a single callback URL for each app making this approach unviable for some providers (e.g. GitHub).
 
-### 6a. When it's time to add a new UI component
-
-Run the `ui-add` script to add a new UI component using the interactive `shadcn/ui` CLI:
-
-```bash
-pnpm nx run @acme/ui:ui-add
-```
-
-> **Note**: `@acme/ui` is React-based (Radix + shadcn). The Solid web app does not consume it today; use it only in React consumers (e.g. Expo) or port components to Solid.
-
-### 6b. When it's time to add a new package
+### 6a. When it's time to add a new package
 
 To add a new package, create a folder under `packages/` with a `package.json` named `@acme/<name>`. The Nx `package-json` plugin infers every script as a target automatically, so no registration is needed.
 
 Set up the `package.json`, `tsconfig.json` and a `index.ts`, and extend the shared tooling packages (`@acme/eslint-config`, `@acme/prettier-config`, `@acme/tsconfig`) to configure formatting, linting and typechecking for the new package.
 
+## Server hardening & observability
+
+All served by `createApp` in [packages/api](./packages/api/src/index.ts):
+
+- `GET /healthz` — public liveness probe (`{"ok":true}`, no auth), suitable for container healthchecks.
+- Security headers on every response: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, plus `Strict-Transport-Security: max-age=31536000; includeSubDomains` when `NODE_ENV=production`.
+- `GET /swagger` (UI) and `GET /swagger/json` (OpenAPI 3.0.3) generated from the mounted routes. `@elysiajs/swagger` is pinned to `1.0.5` in the catalog: newer versions pull `@scalar/*`, which crashes under the repo's `zod<4` security override (spec 20 divergence 1).
+- `/api/auth/*` rate limit: 60 requests/minute per IP (`x-forwarded-for`, else the socket address), answering `429` with `{"error":"Too many requests"}`. Blocked requests are logged too.
+- One stdout log line per response — `METHOD path status durationMs` — silenced when `NODE_ENV=test`.
+- Production fail-fast: the server exits non-zero at boot if `AUTH_SECRET` is unset or still the `local-dev-placeholder-not-for-prod` default.
+
 ## Docker
 
 ```bash
+# One-time: supply the auth secret to compose (shell or .env, never committed)
+export AUTH_SECRET="$(openssl rand -base64 32)"
+
 docker compose up --build
 ```
 
 - **server**: Bun image; runs `mikro-orm migration:up` at boot, then serves Elysia on port 3000. SQLite persists in the `./data` volume (`/data/sqlite.db`).
 - **web**: builds `@acme/web` with `pnpm nx run @acme/web:build` and serves the static bundle via nginx on port 3001.
 
-Auth env vars (`AUTH_SECRET`) are read from your shell/`.env` by compose.
+Compose passes `AUTH_SECRET`, `BETTER_AUTH_URL` and `PORT` straight through to the server container (list-syntax `environment:`), so your shell/`.env` values win over the `.env.schema` defaults; if unset, the container boots on the schema defaults. There is no frozen-env file — config resolves at boot via varlock, and the image builds from a fresh clone with no secrets.
+
+Both services declare healthchecks: the server answers `GET /api/auth/ok`, web waits for it (`depends_on: condition: service_healthy`) and answers on port 80. The web image's nginx (`nginx/web.conf`) serves the static bundle and proxies `/api/` to `http://server:3000`, so same-origin deployments work out of the box — build the web image with `VITE_API_URL` set to the public origin (e.g. `http://host:3001`) to point the bundle at that proxy.
 
 ## CI
 
-[.github/workflows/ci.yml](./.github/workflows/ci.yml) runs `env`, `lint`, `format`, `typecheck`, `@acme/web:check`, `test`, `e2e`, `build` (Nx production build), `expo` (`expo export --platform ios` JS-bundle smoke build), `audit` (`pnpm audit --audit-level high`, enforced via the `overrides` pins in [pnpm-workspace.yaml](./pnpm-workspace.yaml)) and `secret-scan` (gitleaks, config in [.gitleaks.toml](./.gitleaks.toml)) jobs on PRs, `master` pushes and merge queues, all using the composite setup action in `tooling/github/setup` (the `env` job validates the `.env.schema` contracts; no `.env` copy needed). Dependency updates are handled by Renovate.
+[.github/workflows/ci.yml](./.github/workflows/ci.yml) runs `env`, `lint`, `format`, `typecheck`, `@acme/web:check`, `test`, `e2e`, `build` (Nx production build), `docker` (`docker compose build` — both images, no secrets needed), `expo` (`expo export --platform ios` JS-bundle smoke build), `audit` (`pnpm audit --audit-level high`, enforced via the `overrides` pins in [pnpm-workspace.yaml](./pnpm-workspace.yaml)) and `secret-scan` (gitleaks, config in [.gitleaks.toml](./.gitleaks.toml)) jobs on PRs, `master` pushes and merge queues, all using the composite setup action in `tooling/github/setup` (the `env` job validates the `.env.schema` contracts; no `.env` copy needed). Dependency updates are handled by Renovate.
 
 This repo publishes on `master`, so both the CI push trigger and Nx's affected base (`"defaultBase"` in [nx.json](./nx.json)) point at `master`. Template adopters whose default branch is `main` must flip `"defaultBase"` back to `main` after export, or `nx affected` will diff against a branch that doesn't exist.
 

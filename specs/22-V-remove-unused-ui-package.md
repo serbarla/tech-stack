@@ -15,9 +15,9 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 ## 1. Objectives
 
-- [ ] 1. Delete `packages/ui` and its references — requirements: first verify no consumer exists (`grep -rn "@acme/ui\|ui-add" apps packages tooling .github || true` — expected: only README/AGENTS prose); then `git rm -r packages/ui`; run `pnpm install` to drop it from the lockfile/workspace graph; remove the `@acme/ui` README tree entry, the "6a ui-add" README section, and any AGENTS.md/other docs mention; commands: `grep -rn "@acme/ui\|ui-add" apps packages tooling README.md AGENTS.md .github || true` then `git rm -r packages/ui && pnpm install`
+- [x] 1. Delete `packages/ui` and its references — requirements: first verify no consumer exists (`grep -rn "@acme/ui\|ui-add" apps packages tooling .github || true` — expected: only README/AGENTS prose); then `git rm -r packages/ui`; run `pnpm install` to drop it from the lockfile/workspace graph; remove the `@acme/ui` README tree entry, the "6a ui-add" README section, and any AGENTS.md/other docs mention; commands: `grep -rn "@acme/ui\|ui-add" apps packages tooling README.md AGENTS.md .github || true` then `git rm -r packages/ui && pnpm install`
 
-- [ ] 2. Prove the stack is unaffected — requirements: root lint/format/typecheck/build/e2e all green without the package; commands: `pnpm lint && pnpm format && pnpm typecheck && pnpm build`
+- [x] 2. Prove the stack is unaffected — requirements: root lint/format/typecheck/build/e2e all green without the package; commands: `pnpm lint && pnpm format && pnpm typecheck && pnpm build`
 
 ## 2. No-go
 
@@ -29,11 +29,11 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 *All boxes checked = spec done.*
 
-- [ ] `grep -rn "@acme/ui\|ui-add" apps packages tooling README.md AGENTS.md` prints nothing.
-- [ ] `pnpm lint && pnpm format && pnpm typecheck` exit 0 (task count drops by one for the deleted package).
-- [ ] `pnpm build` exits 0.
-- [ ] `pnpm --filter @acme/web e2e` → 2 tests pass.
-- [ ] every objective in section 1 is checked.
+- [x] `grep -rn "@acme/ui\|ui-add" apps packages tooling README.md AGENTS.md` prints nothing.
+- [x] `pnpm lint && pnpm format && pnpm typecheck` exit 0 (task count drops by one for the deleted package).
+- [x] `pnpm build` exits 0.
+- [x] `pnpm --filter @acme/web e2e` → 2 tests pass.
+- [x] every objective in section 1 is checked.
 
 ## 4. Divergences
 
@@ -44,7 +44,7 @@ why, the fix attempt(s), and (if unresolved) a pointer to a tracking file. Keep
 the `- [ ]` testing-criteria box unchecked and note the divergence inline next
 to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
-- [ ] every divergence found is appended below (or the section reads "None.")
+- [x] every divergence found is appended below (or the section reads "None.")
 
 *Format (one numbered item per divergence):*
 
@@ -55,7 +55,19 @@ to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
 ### Divergences
 
-None yet — to be filled in at execution time.
+1. Plain `pnpm install` after `git rm -r packages/ui` left the `packages/ui`
+   importer in `pnpm-lock.yaml` and reported "Lockfile is up to date" — the
+   shell exports `CI=true`, which makes pnpm default to `--frozen-lockfile` and
+   silently skip importer pruning. Resolved by running
+   `CI=false pnpm install --no-frozen-lockfile`, which regenerated the lockfile
+   without any `packages/ui`/`@acme/ui` entry and without changing the resolved
+   versions of the remaining workspace deps (`vite` stays `8.3.5`, `elysia`
+   `1.4.30`, `solid-js` `2.0.0-rc.18`; only the ui-only dependency closure —
+   radix-ui, `@radix-ui/react-icons`, `class-variance-authority`, `sonner`,
+   `tailwind-merge`, `@floating-ui/*` — was pruned). No testing criterion is
+   blocked; the `react19` catalog stays because `apps/expo` still uses it.
+   (Verified 2026-10-29: 1 fix attempt — `CI=false pnpm install
+   --no-frozen-lockfile` — no constraint fenced it.)
 
 ### Unresolved divergences → `specs/divergencies/`
 

@@ -7,7 +7,11 @@ COPY apps apps
 COPY packages packages
 COPY tooling tooling
 RUN pnpm install --frozen-lockfile
+# Same-origin deployments: set VITE_API_URL to this origin (e.g. http://host:3001)
+# at web build time so the bundle calls /api on the nginx proxy. Unset → schema default.
+ARG VITE_API_URL
 RUN pnpm nx run @acme/web:build
 
 FROM nginx:alpine AS run
+COPY nginx/web.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/web/dist/client /usr/share/nginx/html
