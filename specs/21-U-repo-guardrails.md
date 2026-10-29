@@ -15,13 +15,13 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 ## 1. Objectives
 
-- [ ] 1. Add `.npmrc` — requirements: `engine-strict=true` so `engines.node`/`engines.pnpm` are enforced at install; no other settings; commands: `grep -n "engine-strict" .npmrc && pnpm install`
+- [x] 1. Add `.npmrc` — requirements: `engine-strict=true` so `engines.node`/`engines.pnpm` are enforced at install; no other settings; commands: `grep -n "engine-strict" .npmrc && pnpm install`
 
-- [ ] 2. Add `.editorconfig` and `.gitattributes` — requirements: `.editorconfig` (UTF-8, LF, 2-space indent, trailing whitespace trimmed, final newline) matching the Prettier config; `.gitattributes` with `* text=auto eol=lf`; commands: `git check-attr text eol -- pnpm-lock.yaml`
+- [x] 2. Add `.editorconfig` and `.gitattributes` — requirements: `.editorconfig` (UTF-8, LF, 2-space indent, trailing whitespace trimmed, final newline) matching the Prettier config; `.gitattributes` with `* text=auto eol=lf`; commands: `git check-attr text eol -- pnpm-lock.yaml`
 
-- [ ] 3. Add `LICENSE` (MIT), `SECURITY.md`, `CODEOWNERS` — requirements: `LICENSE` MIT, copyright 2026, matching the per-package `"license": "MIT"`; `SECURITY.md` with a short disclosure policy pointing at GitHub private vulnerability reporting; `CODEOWNERS` with `* @serbarla` (template adopters change the handle); commands: `head -2 LICENSE && ls SECURITY.md CODEOWNERS`
+- [x] 3. Add `LICENSE` (MIT), `SECURITY.md`, `CODEOWNERS` — requirements: `LICENSE` MIT, copyright 2026, matching the per-package `"license": "MIT"`; `SECURITY.md` with a short disclosure policy pointing at GitHub private vulnerability reporting; `CODEOWNERS` with `* @serbarla` (template adopters change the handle); commands: `head -2 LICENSE && ls SECURITY.md CODEOWNERS`
 
-- [ ] 4. Add a root `format:write` script — requirements: `package.json` gains `"format:write": "pnpm -r --parallel exec prettier . --write --ignore-path ../../.gitignore"` (runs from each package dir, so the `../../.gitignore` ignore-path resolves identically to the per-package scripts; parity with the existing `format` target, which is also per-package and never touches the root lockfile); after running it, `pnpm format` must be green; commands: `pnpm format:write && pnpm format`
+- [x] 4. Add a root `format:write` script — requirements: `package.json` gains `"format:write": "pnpm -r --parallel exec prettier . --write --ignore-path ../../.gitignore"` (runs from each package dir, so the `../../.gitignore` ignore-path resolves identically to the per-package scripts; parity with the existing `format` target, which is also per-package and never touches the root lockfile); after running it, `pnpm format` must be green; commands: `pnpm format:write && pnpm format`
 
 ## 2. No-go
 
@@ -35,12 +35,12 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 *All boxes checked = spec done.*
 
-- [ ] `grep -n "engine-strict" .npmrc` prints `engine-strict=true`.
-- [ ] `git check-attr text eol -- pnpm-lock.yaml` prints `text: auto` and `eol: lf`.
-- [ ] `LICENSE`, `SECURITY.md`, `CODEOWNERS` exist; `head -2 LICENSE` shows MIT.
-- [ ] `pnpm format:write` exits 0 and `pnpm format` exits 0 afterwards.
-- [ ] `pnpm install` exits 0 under engine-strict.
-- [ ] every objective in section 1 is checked.
+- [x] `grep -n "engine-strict" .npmrc` prints `engine-strict=true`.
+- [x] `git check-attr text eol -- pnpm-lock.yaml` prints `text: auto` and `eol: lf`.
+- [x] `LICENSE`, `SECURITY.md`, `CODEOWNERS` exist; `head -2 LICENSE` shows MIT.
+- [x] `pnpm format:write` exits 0 and `pnpm format` exits 0 afterwards.
+- [x] `pnpm install` exits 0 under engine-strict.
+- [x] every objective in section 1 is checked.
 
 ## 4. Divergences
 
@@ -51,7 +51,7 @@ why, the fix attempt(s), and (if unresolved) a pointer to a tracking file. Keep
 the `- [ ]` testing-criteria box unchecked and note the divergence inline next
 to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
-- [ ] every divergence found is appended below (or the section reads "None.")
+- [x] every divergence found is appended below (or the section reads "None.")
 
 *Format (one numbered item per divergence):*
 
@@ -62,7 +62,35 @@ to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
 ### Divergences
 
-None yet — to be filled in at execution time.
+1. The root `format:write` script is not parity with `pnpm format`: the
+   prescribed command
+   `pnpm -r --parallel exec prettier . --write --ignore-path ../../.gitignore`
+   omits the `--ignore-path .prettierignore` that every app's `format` target
+   passes, so it rewrites five git-tracked, generated declaration files —
+   `apps/expo/env.d.ts`, `apps/expo/uniwind-types.d.ts`,
+   `apps/server/env.d.ts`, `apps/web/env.d.ts`, `apps/web/file-routes.d.ts` —
+   that `apps/*/.prettierignore` explicitly excludes ("leave it as
+   varlock/uniwind/filesystem-routing writes it"). Observed: `pnpm format:write`
+   writes all five, then `pnpm env:validate` (the CI `env` job) regenerates the
+   three `env.d.ts` files straight back to their unformatted form, so the root
+   writer has no fixpoint against codegen; `pnpm format` stays green throughout
+   because those files are ignored there — current state: the Command is in
+   place verbatim and the five files were reverted to `HEAD`, so this spec lands
+   no generated-file churn — the exact command string is a hard requirement of
+   objective 4, and appending `--ignore-path .prettierignore` (the only fix that
+   restores the parity objective 4 describes) would deviate from it, so it was
+   not applied (Verified 2026-10-29: 0 fix attempts — the string is fixed by the
+   objective, not by reality; no testing criterion is blocked, both
+   `pnpm format:write` and `pnpm format` exit 0. Recommended one-line follow-up
+   for the owner: append `--ignore-path .prettierignore` to the root
+   `format:write` script.) ~~Tracked for future check-up in `specs/divergencies/21-U-format-write-ignore-path.md`~~ (tracking file removed on resolution, see below.)
+
+   **RESOLVED 2026-10-29:** root `format:write` now passes
+   `--ignore-path .prettierignore` (the script runs via `pnpm -r exec` from
+   each package dir, so the relative path resolves per package). Re-verified:
+   `pnpm format:write` leaves all five generated files byte-identical
+   (shasum before/after) and exits 0; `pnpm format` exits 0. Tracking file
+   `specs/divergencies/21-U-format-write-ignore-path.md` deleted.
 
 ### Unresolved divergences → `specs/divergencies/`
 
