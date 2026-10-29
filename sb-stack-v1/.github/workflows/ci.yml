@@ -149,6 +149,9 @@ jobs:
       - name: Setup
         uses: ./tooling/github/setup
 
+      - name: Expo SDK drift check
+        run: pnpm --filter @acme/expo exec expo install --check
+
       - name: Expo export (iOS JS bundle, no native tooling)
         run: pnpm --filter @acme/expo exec expo export --platform ios
 

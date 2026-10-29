@@ -12,15 +12,6 @@ coverage
 test-results/
 playwright-report/
 
-# next.js
-.next/
-out/
-next-env.d.ts
-
-# nitro
-.nitro/
-.output/
-
 # expo
 .expo/
 .expo-shared/
@@ -47,15 +38,9 @@ yarn-error.log*
 .env*.local
 .varlock-frozen-env
 
-# vercel
-.vercel
-
 # typescript
 dist/
 .cache
-
-# tanstack
-.tanstack
 
 # nx
 .nx

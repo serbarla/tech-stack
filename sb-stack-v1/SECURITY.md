@@ -11,6 +11,10 @@ Do **not** open a public issue, pull request, or discussion for a vulnerability.
 Report it through GitHub's private vulnerability reporting for this repository:
 <https://github.com/serbarla/tech-stack/security/advisories/new>
 
+> **Template adopters**: replace the link above with your own repository's
+> private vulnerability reporting page, so reports land with you instead of
+> this template's source repo.
+
 Include what you can: affected app/package and version, reproduction steps, and
 impact. Reports are acknowledged within 5 business days, and a fix or mitigation
 timeline is shared once the report is triaged. Please keep the report private

@@ -16,7 +16,7 @@ Current stack:
 - **Auth**: [better-auth](https://www.better-auth.com) mounted directly into the Elysia app, with the Expo plugin
 - **Database**: SQLite via `node:sqlite`, accessed through [MikroORM 7](https://mikro-orm.io) with a [Kysely](https://kysely.dev) escape hatch (`orm.em.getKysely()`)
 - **Web**: SolidJS (`solid-js` 2.0 rc) + Vite Plus + filesystem routing + Tailwind CSS v4
-- **Mobile**: Expo SDK 58, React Native 0.88 / React 19, Expo Router, Uniwind (Tailwind v4), TanStack Query
+- **Mobile**: Expo SDK 58, React Native 0.88 / React 19, Expo Router, Reanimated 4 + Safe Area Context, Uniwind (Tailwind v4), TanStack Query
 - **Validation**: shared zod v4 schemas in `@acme/validators`
 
 ```text
@@ -192,7 +192,7 @@ Both services declare healthchecks: the server answers `GET /api/auth/ok`, web w
 
 ## CI
 
-[.github/workflows/ci.yml](./.github/workflows/ci.yml) runs `env`, `lint`, `format`, `typecheck`, `@acme/web:check`, `test`, `e2e`, `build` (Nx production build), `docker` (`docker compose build` — both images, no secrets needed), `expo` (`expo export --platform ios` JS-bundle smoke build), `audit` (`pnpm audit --audit-level high`, enforced via the `overrides` pins in [pnpm-workspace.yaml](./pnpm-workspace.yaml)) and `secret-scan` (gitleaks, config in [.gitleaks.toml](./.gitleaks.toml)) jobs on PRs, `master` pushes and merge queues, all using the composite setup action in `tooling/github/setup` (the `env` job validates the `.env.schema` contracts; no `.env` copy needed). Dependency updates are handled by Renovate.
+[.github/workflows/ci.yml](./.github/workflows/ci.yml) runs `env`, `lint`, `format`, `typecheck`, `@acme/web:check`, `test`, `e2e`, `build` (Nx production build), `docker` (`docker compose build` — both images, no secrets needed), `expo` (`expo install --check` SDK drift gate + `expo export --platform ios` JS-bundle smoke build), `audit` (`pnpm audit --audit-level high`, enforced via the `overrides` pins in [pnpm-workspace.yaml](./pnpm-workspace.yaml)) and `secret-scan` (gitleaks, config in [.gitleaks.toml](./.gitleaks.toml)) jobs on PRs, `master` pushes and merge queues, all using the composite setup action in `tooling/github/setup` (the `env` job validates the `.env.schema` contracts; no `.env` copy needed). Dependency updates are handled by Renovate.
 
 This repo publishes on `master`, so both the CI push trigger and Nx's affected base (`"defaultBase"` in [nx.json](./nx.json)) point at `master`. Template adopters whose default branch is `main` must flip `"defaultBase"` back to `main` after export, or `nx affected` will diff against a branch that doesn't exist.
 

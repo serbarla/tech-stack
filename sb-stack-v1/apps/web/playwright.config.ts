@@ -12,13 +12,17 @@ export default defineConfig({
       url: "http://localhost:3000/api/auth/ok",
       // Explicit overrides keep a developer's exported PORT/VITE_API_URL/
       // DATABASE_URL (or NODE_ENV=production, which trips the boot guard) from
-      // breaking the e2e run; {...process.env} keeps PATH/HOME.
+      // breaking the e2e run; {...process.env} keeps PATH/HOME. AUTH_SECRET is
+      // pinned too so an encrypted .env.local (varlock hardware backend) can't
+      // block the boot on an interactive decryption prompt.
       env: {
         ...process.env,
         NODE_ENV: "development",
         PORT: "3000",
         VITE_API_URL: "http://localhost:3000",
         DATABASE_URL: "data/e2e.db",
+        AUTH_SECRET:
+          "e2e-local-secret-not-for-prod-0123456789abcdef0123456789abcdef",
       },
       timeout: 120_000,
     },
