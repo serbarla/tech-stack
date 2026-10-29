@@ -79,7 +79,7 @@ overrides:
   'picomatch@<3.0.0': 2.3.2
   'picomatch@^4.0.0': 4.0.7
   postcss: 8.5.31
-  'seroval@<1.7.0': 1.6.3
+  'seroval@<1.7.0': 1.6.12
   shell-quote: 1.11.0
   source-map-js: 1.2.2
   undici: 7.30.1
@@ -89,6 +89,17 @@ overrides:
   # 4.x keeps the classic API for the config-validation use in @expo/cli
   # and @tanstack plugins. Verified with pnpm build + expo export (18-R).
   'zod@<4.0.0': 4.6.7
+
+# GHSA-qr28-fpjm-wq7f (decode-uri-component <=0.5.0) is unfixable in place:
+# query-string@7.1.3 (pinned ^7.1.3 by expo-router) requires the 0.2.x call
+# shape, while the only patched line (0.5.1) exports { default } — forcing it
+# breaks query-string at runtime (verified: `require()` returns a non-callable).
+# Bumping query-string across two majors inside expo-router is not
+# runtime-verifiable without a dev build. Exposure: percent-encoded DoS via
+# URL parsing inside the RN client. Track with the next expo-router upgrade.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-qr28-fpjm-wq7f
 
 publicHoistPattern:
   - '@ianvs/prettier-plugin-sort-imports'

@@ -109,7 +109,7 @@ overrides:
   picomatch@<3.0.0: 2.3.2
   picomatch@^4.0.0: 4.0.7
   postcss: 8.5.31
-  seroval@<1.7.0: 1.6.3
+  seroval@<1.7.0: 1.6.12
   shell-quote: 1.11.0
   source-map-js: 1.2.2
   undici: 7.30.1
@@ -6810,16 +6810,16 @@ packages:
     resolution: {integrity: sha512-16OL3NnUBw8JG1jBLUoZJsLnQq0n5Ua6aHalhJK4fMQkz1lqR7Osz1sA30trBtd9VUDc2NgkuRCn8+/pBwqZ+w==}
     engines: {node: '>=10'}
     peerDependencies:
-      seroval: 1.6.3
+      seroval: 1.6.12
 
   seroval-plugins@1.7.0:
     resolution: {integrity: sha512-WM4rArfPtLZriTuxC5DBvNulEwAaRcjNe/dkMOEesOcuvXf5nEwKf5Bw3AT92WHohqcc45+57GdtsCuBTI0mjw==}
     engines: {node: '>=20'}
     peerDependencies:
-      seroval: 1.6.3
+      seroval: 1.6.12
 
-  seroval@1.6.3:
-    resolution: {integrity: sha512-5PwLbVPpT4DEki1hYVSSsoxWY6xCNMVucAVLK/CH0mXSDfp/I4KaAex72q80GNt5hpn7CCMGdSpIg4YGqH/wXQ==}
+  seroval@1.6.12:
+    resolution: {integrity: sha512-CqbIVfk/7GL3ITwZI55lcPbpQbjHZ2DD5cUj4iH7E9YsCfHNJV1mx7yNp86Z84w5IpmkZZS/2s5vPOWmVWSdQg==}
     engines: {node: '>=10'}
 
   seroval@1.7.0:
@@ -10439,8 +10439,8 @@ snapshots:
       '@tanstack/history': 1.133.28
       '@tanstack/store': 0.8.0
       cookie-es: 2.0.0
-      seroval: 1.6.3
-      seroval-plugins: 1.7.0(seroval@1.6.3)
+      seroval: 1.6.12
+      seroval-plugins: 1.7.0(seroval@1.6.12)
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
     optional: true
@@ -10597,7 +10597,7 @@ snapshots:
     dependencies:
       '@tanstack/router-core': 1.135.2
       '@tanstack/start-storage-context': 1.135.2
-      seroval: 1.6.3
+      seroval: 1.6.12
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
     optional: true
@@ -10708,7 +10708,7 @@ snapshots:
       '@tanstack/start-client-core': 1.135.2
       '@tanstack/start-storage-context': 1.135.2
       h3-v2: h3@2.0.1-rc.15(crossws@0.4.1(srvx@0.11.22))
-      seroval: 1.6.3
+      seroval: 1.6.12
       tiny-invariant: 1.3.3
     transitivePeerDependencies:
       - crossws
@@ -14728,21 +14728,21 @@ snapshots:
 
   serialize-error@2.1.0: {}
 
-  seroval-plugins@1.3.3(seroval@1.6.3):
+  seroval-plugins@1.3.3(seroval@1.6.12):
     dependencies:
-      seroval: 1.6.3
+      seroval: 1.6.12
     optional: true
 
-  seroval-plugins@1.7.0(seroval@1.6.3):
+  seroval-plugins@1.7.0(seroval@1.6.12):
     dependencies:
-      seroval: 1.6.3
+      seroval: 1.6.12
     optional: true
 
   seroval-plugins@1.7.0(seroval@1.7.0):
     dependencies:
       seroval: 1.7.0
 
-  seroval@1.6.3:
+  seroval@1.6.12:
     optional: true
 
   seroval@1.7.0: {}
@@ -14849,8 +14849,8 @@ snapshots:
   solid-js@1.9.9:
     dependencies:
       csstype: 3.2.3
-      seroval: 1.6.3
-      seroval-plugins: 1.3.3(seroval@1.6.3)
+      seroval: 1.6.12
+      seroval-plugins: 1.3.3(seroval@1.6.12)
     optional: true
 
   solid-js@2.0.0-rc.18:
