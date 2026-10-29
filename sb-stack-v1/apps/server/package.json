@@ -16,7 +16,6 @@
     "@acme/auth": "workspace:*",
     "@acme/db": "workspace:*",
     "better-auth": "catalog:",
-    "elysia": "catalog:",
     "varlock": "catalog:"
   },
   "devDependencies": {

@@ -1,20 +1,24 @@
-import { CreatePostSchema } from "@acme/validators";
+import type { SourceAccessor } from "solid-js";
 import { Title } from "@solidjs/meta";
 import {
-  type SourceAccessor,
-  For,
-  Show,
   affects,
   createMemo,
   createSignal,
+  For,
   refresh,
+  Show,
 } from "solid-js";
 
+import { CreatePostSchema } from "@acme/validators";
+
+import type { PostsResult } from "../lib/api";
 import { api } from "../lib/api";
 import { authClient } from "../lib/auth";
 
-type SessionResult = Awaited<ReturnType<typeof authClient.getSession>>;
-type PostsResult = Awaited<ReturnType<typeof api.api.posts.get>>;
+type SessionUser = (typeof authClient.$Infer.Session)["user"];
+type SessionResult =
+  | { data: { user: SessionUser } | null; error: null }
+  | { data: null; error: { message?: string } };
 
 function AuthShowcase(props: { session: SourceAccessor<SessionResult> }) {
   const [mode, setMode] = createSignal<"signin" | "signup">("signin");
@@ -94,8 +98,12 @@ function AuthShowcase(props: { session: SourceAccessor<SessionResult> }) {
                 onInput={(e) => setPassword(e.currentTarget.value)}
               />
             </label>
-            <Show when={formError()}>{(m) => <p class="form-error">{m()}</p>}</Show>
-            <button type="submit">{mode() === "signup" ? "Sign up" : "Sign in"}</button>
+            <Show when={formError()}>
+              {(m) => <p class="form-error">{m()}</p>}
+            </Show>
+            <button type="submit">
+              {mode() === "signup" ? "Sign up" : "Sign in"}
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -103,14 +111,16 @@ function AuthShowcase(props: { session: SourceAccessor<SessionResult> }) {
                 setMode(mode() === "signup" ? "signin" : "signup");
               }}
             >
-              {mode() === "signup" ? "Have an account? Sign in" : "Need an account? Sign up"}
+              {mode() === "signup"
+                ? "Have an account? Sign in"
+                : "Need an account? Sign up"}
             </button>
           </form>
         }
       >
         {(user) => (
           <div class="signed-in">
-            <span>Signed in as {user().name ?? user().email}</span>
+            <span>Signed in as {user().name || user().email}</span>
             <button type="button" onClick={signOut}>
               Sign out
             </button>
@@ -163,9 +173,15 @@ function CreatePostForm(props: { onCreated: () => void }) {
       </label>
       <label>
         Content
-        <textarea required value={content()} onInput={(e) => setContent(e.currentTarget.value)} />
+        <textarea
+          required
+          value={content()}
+          onInput={(e) => setContent(e.currentTarget.value)}
+        />
       </label>
-      <Show when={formError()}>{(message) => <p class="form-error">{message()}</p>}</Show>
+      <Show when={formError()}>
+        {(message) => <p class="form-error">{message()}</p>}
+      </Show>
       <button type="submit">Create</button>
     </form>
   );
@@ -175,7 +191,10 @@ function PostList(props: { posts: SourceAccessor<PostsResult> }) {
   return (
     <section class="post-list">
       <h2>Posts</h2>
-      <Show when={props.posts().data} fallback={<p class="empty">No posts yet.</p>}>
+      <Show
+        when={props.posts().data}
+        fallback={<p class="empty">No posts yet.</p>}
+      >
         {(items) => (
           <ul>
             <For each={items()} fallback={<p class="empty">No posts yet.</p>}>

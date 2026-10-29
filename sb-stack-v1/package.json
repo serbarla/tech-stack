@@ -11,6 +11,7 @@
     "clean": "nx run-many -t clean",
     "dev": "nx run-many -t dev --parallel",
     "format": "nx run-many -t format --parallel",
+    "format:write": "pnpm -r --parallel exec prettier . --write --ignore-path ../../.gitignore --ignore-path .prettierignore",
     "lint": "nx run-many -t lint --parallel",
     "typecheck": "nx run-many -t typecheck",
     "db:migrate": "nx run @acme/db:migration:up",

@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,7 +20,10 @@ export function getDatabasePath(): string {
   const raw = process.env.DATABASE_URL;
   const configured =
     raw && raw.trim() !== "" ? raw.trim() : DEFAULT_DATABASE_URL;
-  return isAbsolute(configured)
+  const path = isAbsolute(configured)
     ? configured
     : resolve(findWorkspaceRoot(), configured);
+  // Fresh clones have no gitignored data/ dir; node:sqlite fails without it.
+  mkdirSync(dirname(path), { recursive: true });
+  return path;
 }

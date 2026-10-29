@@ -46,8 +46,6 @@ packages
   │   └─ better-auth on node:sqlite; email & password, Expo plugin
   ├─ db
   │   └─ MikroORM 7 (SqliteDriver + NodeSqliteDialect), entities, migrations, Kysely
-  ├─ ui
-  │   └─ shadcn-ui component library (React-based; currently not consumed by the Solid web app)
   └─ validators
       └─ Shared zod v4 schemas (e.g. `CreatePostSchema`)
 tooling
@@ -95,13 +93,13 @@ pnpm dev
 
 Environment variables (see `.env.schema`):
 
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | SQLite file path (`data/sqlite.db` locally, `/data/sqlite.db` in Docker) |
-| `BETTER_AUTH_URL` | Public URL of the Elysia server (better-auth base URL) |
-| `PORT` | Server port (default `3000`) |
-| `AUTH_SECRET` | better-auth secret (`openssl rand -base64 32`) |
-| `VITE_API_URL` | Base URL the web app uses to reach the API (default `http://localhost:3000`) |
+| Variable          | Purpose                                                                      |
+| ----------------- | ---------------------------------------------------------------------------- |
+| `DATABASE_URL`    | SQLite file path (`data/sqlite.db` locally, `/data/sqlite.db` in Docker)     |
+| `BETTER_AUTH_URL` | Public URL of the Elysia server (better-auth base URL)                       |
+| `PORT`            | Server port (default `3000`)                                                 |
+| `AUTH_SECRET`     | better-auth secret (`openssl rand -base64 32`)                               |
+| `VITE_API_URL`    | Base URL the web app uses to reach the API (default `http://localhost:3000`) |
 
 ### 2. Auth schema
 
@@ -157,36 +155,46 @@ By using the proxy plugin, your server will forward any auth requests to the pro
 
 You can alternatively add your local IP (e.g. `192.168.x.y:$PORT`) to your OAuth provider. This may not be as reliable as your local IP may change when you change networks. Some OAuth providers may also only support a single callback URL for each app making this approach unviable for some providers (e.g. GitHub).
 
-### 6a. When it's time to add a new UI component
-
-Run the `ui-add` script to add a new UI component using the interactive `shadcn/ui` CLI:
-
-```bash
-pnpm nx run @acme/ui:ui-add
-```
-
-> **Note**: `@acme/ui` is React-based (Radix + shadcn). The Solid web app does not consume it today; use it only in React consumers (e.g. Expo) or port components to Solid.
-
-### 6b. When it's time to add a new package
+### 6a. When it's time to add a new package
 
 To add a new package, create a folder under `packages/` with a `package.json` named `@acme/<name>`. The Nx `package-json` plugin infers every script as a target automatically, so no registration is needed.
 
 Set up the `package.json`, `tsconfig.json` and a `index.ts`, and extend the shared tooling packages (`@acme/eslint-config`, `@acme/prettier-config`, `@acme/tsconfig`) to configure formatting, linting and typechecking for the new package.
 
+## Server hardening & observability
+
+All served by `createApp` in [packages/api](./packages/api/src/index.ts):
+
+- `GET /healthz` — public liveness probe (`{"ok":true}`, no auth), suitable for container healthchecks.
+- Security headers on every response: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, plus `Strict-Transport-Security: max-age=31536000; includeSubDomains` when `NODE_ENV=production`.
+- `GET /swagger` (UI) and `GET /swagger/json` (OpenAPI 3.0.3) generated from the mounted routes. `@elysiajs/swagger` is pinned to `1.0.5` in the catalog: newer versions pull `@scalar/*`, which crashes under the repo's `zod<4` security override (spec 20 divergence 1).
+- `/api/auth/*` rate limit: 60 requests/minute per IP (`x-forwarded-for`, else the socket address), answering `429` with `{"error":"Too many requests"}`. Blocked requests are logged too.
+- One stdout log line per response — `METHOD path status durationMs` — silenced when `NODE_ENV=test`.
+- Production fail-fast: the server exits non-zero at boot if `AUTH_SECRET` is unset or still the `local-dev-placeholder-not-for-prod` default.
+
 ## Docker
 
 ```bash
+# One-time: supply the deploy config to compose (shell or .env, never committed)
+export AUTH_SECRET="$(openssl rand -base64 32)"
+export BETTER_AUTH_URL="http://your-host:3000"   # public URL of the Elysia server
+export VITE_API_URL="http://your-host:3001"      # public origin of the web app
+
 docker compose up --build
 ```
 
-- **server**: Bun image; runs `mikro-orm migration:up` at boot, then serves Elysia on port 3000. SQLite persists in the `./data` volume (`/data/sqlite.db`).
+- **server**: Bun image; runs `mikro-orm migration:up` at boot, then serves Elysia on port 3000. SQLite persists in the `sb-data` named volume (`/data/sqlite.db`) — a named volume keeps the non-root `bun` user writable on Linux hosts, where a `./data` bind mount would be created root-owned and refuse writes. Inspect or back up the DB with `docker compose cp server:/data/sqlite.db ./data/sqlite.db` (stop the server first for a consistent copy).
 - **web**: builds `@acme/web` with `pnpm nx run @acme/web:build` and serves the static bundle via nginx on port 3001.
 
-Auth env vars (`AUTH_SECRET`) are read from your shell/`.env` by compose.
+Compose passes `AUTH_SECRET` and `BETTER_AUTH_URL` straight through to the server container (list-syntax `environment:`), so your shell/`.env` values win over the `.env.schema` defaults. The container always serves port 3000 — the port map and healthcheck hardcode it, and `PORT` is deliberately not passed through so a stray host `PORT` cannot wedge the healthcheck. The container boots with `NODE_ENV=production`, so startup is fail-fast: if `AUTH_SECRET` is unset or still the dev placeholder, or `BETTER_AUTH_URL` is unset or still points at `http://localhost`, the server refuses to start and exits non-zero. There is no frozen-env file — config resolves at boot via varlock, and the image builds from a fresh clone with no secrets.
+
+Both services declare healthchecks: the server answers `GET /api/auth/ok`, web waits for it (`depends_on: condition: service_healthy`) and answers on port 80. The web image's nginx (`nginx/web.conf`) serves the static bundle and proxies `/api/` to `http://server:3000`, so same-origin deployments work out of the box — the web image build requires `VITE_API_URL`, the public origin of the web app (e.g. `http://host:3001`), which the bundle uses to reach that proxy: compose refuses to build without it and the Dockerfile hard-fails on an empty build-arg, so a production bundle can never silently embed `http://localhost:3000`.
 
 ## CI
 
-[.github/workflows/ci.yml](./.github/workflows/ci.yml) runs `env`, `lint`, `format`, `typecheck` and `@acme/web:check` jobs on PRs, `main` pushes and merge queues, all using the composite setup action in `tooling/github/setup` (the `env` job validates the `.env.schema` contracts; no `.env` copy needed). Dependency updates are handled by Renovate.
+[.github/workflows/ci.yml](./.github/workflows/ci.yml) runs `env`, `lint`, `format`, `typecheck`, `@acme/web:check`, `test`, `e2e`, `build` (Nx production build), `docker` (`docker compose build` — both images, no secrets needed), `expo` (`expo export --platform ios` JS-bundle smoke build), `audit` (`pnpm audit --audit-level high`, enforced via the `overrides` pins in [pnpm-workspace.yaml](./pnpm-workspace.yaml)) and `secret-scan` (gitleaks, config in [.gitleaks.toml](./.gitleaks.toml)) jobs on PRs, `master` pushes and merge queues, all using the composite setup action in `tooling/github/setup` (the `env` job validates the `.env.schema` contracts; no `.env` copy needed). Dependency updates are handled by Renovate.
+
+This repo publishes on `master`, so both the CI push trigger and Nx's affected base (`"defaultBase"` in [nx.json](./nx.json)) point at `master`. Template adopters whose default branch is `main` must flip `"defaultBase"` back to `main` after export, or `nx affected` will diff against a branch that doesn't exist.
 
 ## FAQ
 
@@ -202,7 +210,7 @@ If you need to share runtime code between the client and server, such as input v
 
 Deploying your Expo application works slightly differently compared to deploying a web app. Instead of "deploying" your app online, you need to submit production builds of your app to app stores, like [Apple App Store](https://www.apple.com/app-store) and [Google Play](https://play.google.com/store/apps). You can read the full [guide to distributing your app](https://docs.expo.dev/distribution/introduction), including best practices, in the Expo docs.
 
-1. Make sure to modify the `getBaseUrl` function in [apps/expo/src/utils/base-url.ts](./apps/expo/src/utils/base-url.ts) to point to your backend's production URL.
+1. Set `EXPO_PUBLIC_API_URL` (declared in [apps/expo/.env.schema](./apps/expo/.env.schema)) to your backend's public URL — it is inlined into the JS bundle at build time and used as the API base whenever the Expo dev client is not attached.
 
 2. Let's start by setting up [EAS Build](https://docs.expo.dev/build/introduction), which is short for Expo Application Services. The build service helps you create builds of your app, without requiring a full native development setup. The commands below are a summary of [Creating your first build](https://docs.expo.dev/build/setup).
 
@@ -264,4 +272,4 @@ Deploying your Expo application works slightly differently compared to deploying
 
 ### Server & Web
 
-`docker compose up --build` is the reference deployment: Elysia on Bun (port 3000, migrations run at boot, SQLite volume at `./data`) and the built Solid bundle behind nginx (port 3001). Point `BETTER_AUTH_URL` and the clients' API base URL at your public host.
+`docker compose up --build` is the reference deployment: Elysia on Bun (port 3000, migrations run at boot, SQLite in the `sb-data` named volume) and the built Solid bundle behind nginx (port 3001). Point `BETTER_AUTH_URL` and the clients' API base URL at your public host.

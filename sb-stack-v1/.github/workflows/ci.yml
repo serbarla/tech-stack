@@ -4,15 +4,18 @@ on:
   pull_request:
     branches: ["*"]
   push:
-    branches: ["main"]
+    branches: ["master"]
   merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 env:
   FORCE_COLOR: 3
+
+permissions:
+  contents: read
 
 jobs:
   env:
@@ -81,6 +84,9 @@ jobs:
       - name: Integration tests
         run: pnpm --filter @acme/server test
 
+      - name: Web unit tests
+        run: pnpm --filter @acme/web test
+
   e2e:
     runs-on: ubuntu-latest
     steps:
@@ -89,9 +95,84 @@ jobs:
       - name: Setup
         uses: ./tooling/github/setup
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
         working-directory: apps/web
 
       - name: Web e2e
         run: pnpm --filter @acme/web e2e
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Build
+        run: pnpm build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Docker build (both images, no secrets)
+        env:
+          VITE_API_URL: http://localhost:3001
+        run: docker compose build
+
+      - name: Smoke boot (both services healthy)
+        run: |
+          export AUTH_SECRET="$(openssl rand -base64 32)" BETTER_AUTH_URL=http://server:3000 VITE_API_URL=http://localhost:3001
+          docker compose up -d --wait
+          curl -sf http://localhost:3000/api/auth/ok
+          curl -sf http://localhost:3001/
+          docker compose ps
+          docker compose down -v
+
+  expo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Expo export (iOS JS bundle, no native tooling)
+        run: pnpm --filter @acme/expo exec expo export --platform ios
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Audit dependencies (high/critical)
+        run: pnpm audit --audit-level high
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_ENABLE_COMMENTS: "false"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

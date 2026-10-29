@@ -1,5 +1,5 @@
-import { Title } from "@solidjs/meta";
 import type { RouteDefinition } from "@solidjs/router";
+import { Title } from "@solidjs/meta";
 import { httpStatus } from "@solidjs/web";
 
 // The catch-all route. httpStatus() is a no-op in the browser and takes
@@ -12,7 +12,7 @@ export const route = {
 export default function NotFound() {
   return (
     <main>
-      <Title>Not Found - Solid App</Title>
+      <Title>Not Found - SB Stack</Title>
       <h1>Page Not Found</h1>
       <p>
         Visit{" "}

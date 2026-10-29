@@ -8,7 +8,7 @@ Nx + pnpm monorepo (T3-style); every `package.json` script is an Nx target. Bun 
 - `packages/api` — `createApp()` factory + post routes; clients import only its `App` type.
 - `packages/auth` — better-auth on node:sqlite; email & password only (no email sending), Expo plugin.
 - `packages/db` — MikroORM 7 + Kysely escape hatch; SQLite file `data/sqlite.db` resolved by `getDatabasePath()`.
-- `packages/validators` — shared zod v4 schemas. `packages/ui` is React/shadcn and unused by web.
+- `packages/validators` — shared zod v4 schemas.
 
 Root commands: `pnpm i`, `pnpm db:migrate`, `pnpm dev` (server + web + expo), `pnpm lint|format|typecheck`.
 

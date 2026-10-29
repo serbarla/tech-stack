@@ -14,6 +14,7 @@ export async function initAuth<
   baseUrl: string;
   databaseUrl: string;
   secret: string | undefined;
+  trustedOrigins?: string[];
   extraPlugins?: TExtraPlugins;
 }): Promise<Auth> {
   const config: BetterAuthOptions = {
@@ -24,7 +25,10 @@ export async function initAuth<
     emailAndPassword: {
       enabled: true,
     },
-    trustedOrigins: ["expo://", "http://localhost:3001"],
+    trustedOrigins: options.trustedOrigins ?? [
+      "expo://",
+      "http://localhost:3001",
+    ],
     onAPIError: {
       onError(error, ctx) {
         console.error("BETTER AUTH API ERROR", error, ctx);

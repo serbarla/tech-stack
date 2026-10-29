@@ -1,6 +1,8 @@
 import { Title } from "@solidjs/meta";
 import { Loading } from "solid-js";
+
 import { paths, Router } from "./router";
+
 import "./App.css";
 
 export default function App() {
@@ -8,7 +10,7 @@ export default function App() {
     <Router>
       {(props) => (
         <>
-          <Title>Solid App</Title>
+          <Title>SB Stack</Title>
           <nav>
             <a href={paths()}>Home</a>
             <a href={paths.users()}>Users</a>

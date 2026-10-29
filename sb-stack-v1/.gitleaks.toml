@@ -1,0 +1,21 @@
+# Gitleaks config (spec 18-R).
+#
+# Extend the default ruleset and allowlist ONLY the documented
+# `local-dev-placeholder-not-for-prod` literal, which appears as the
+# AUTH_SECRET value in the varlock `.env.schema` files. It is a
+# placeholder for local development, not a real secret.
+#
+# The entry is regex-only (not path-scoped) on purpose: a released
+# gitleaks bug makes any allowlist with both `paths` and `condition =
+# "AND"` skip matching files entirely at enumeration (gitleaks/gitleaks
+# PR #2227, fixed on master but not in v8.30.1), which would exempt all
+# of `.env.schema` from scanning. Regex-only allowlists exactly this
+# literal wherever it appears and nothing else: real secrets in
+# `.env.schema` (or anywhere else) still fail.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "varlock .env.schema local-dev placeholder literal (spec 18-R)"
+regexes = ['''local-dev-placeholder-not-for-prod''']

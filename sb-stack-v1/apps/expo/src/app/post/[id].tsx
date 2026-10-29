@@ -6,7 +6,7 @@ import { api } from "~/utils/api";
 
 export default function Post() {
   const { id } = useGlobalSearchParams<{ id: string }>();
-  const { data } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["post", id],
     queryFn: () =>
       api.api
@@ -15,7 +15,26 @@ export default function Post() {
         .then((r) => r.data),
   });
 
-  if (!data) return null;
+  // Loading, bad ids, and offline must not render a blank screen.
+  if (isPending) {
+    return (
+      <SafeAreaView className="bg-background">
+        <View className="h-full w-full p-4">
+          <Text className="text-foreground">Loading…</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <SafeAreaView className="bg-background">
+        <View className="h-full w-full p-4">
+          <Text className="text-destructive">Could not load post</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="bg-background">

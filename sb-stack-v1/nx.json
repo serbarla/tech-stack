@@ -15,8 +15,7 @@
     },
     "lint": {
       "dependsOn": ["^build"],
-      "cache": true,
-      "outputs": ["{projectRoot}/.cache/.eslintcache"]
+      "cache": true
     },
     "typecheck": {
       "dependsOn": ["^build"],
@@ -24,8 +23,7 @@
       "outputs": ["{projectRoot}/.cache/tsbuildinfo.json"]
     },
     "format": {
-      "cache": true,
-      "outputs": ["{projectRoot}/.cache/.prettiercache"]
+      "cache": true
     },
     "check": {
       "dependsOn": ["^build"],
@@ -47,6 +45,6 @@
       "cache": false
     }
   },
-  "defaultBase": "main",
+  "defaultBase": "master",
   "analytics": false
 }

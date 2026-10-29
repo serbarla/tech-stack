@@ -15,11 +15,11 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 ## 1. Objectives
 
-- [ ] 1. Add a Solid ESLint preset to the shared config — requirements: `tooling/eslint/package.json` `dependencies` gains `eslint-plugin-solid` (direct version, matching the `typescript-eslint`/`eslint-plugin-react` pattern — no catalog entry, single-consumer family); new `tooling/eslint/solid.ts` extends `./base` and applies `eslint-plugin-solid/configs/v2` (the config the `apps/web/AGENTS.md` primer recommends); `exports` gains `"./solid": "./solid.ts"`; commands: `pnpm --filter @acme/eslint-config add eslint-plugin-solid && pnpm nx run @acme/eslint-config:typecheck`
+- [x] 1. Add a Solid ESLint preset to the shared config — requirements: `tooling/eslint/package.json` `dependencies` gains `eslint-plugin-solid` (direct version, matching the `typescript-eslint`/`eslint-plugin-react` pattern — no catalog entry, single-consumer family); new `tooling/eslint/solid.ts` extends `./base` and applies `eslint-plugin-solid/configs/v2` (the config the `apps/web/AGENTS.md` primer recommends); `exports` gains `"./solid": "./solid.ts"`; commands: `pnpm --filter @acme/eslint-config add eslint-plugin-solid && pnpm nx run @acme/eslint-config:typecheck` (divergence 1: `solid.ts` does not extend `./base`; see Divergences)
 
-- [ ] 2. Wire lint/format/typecheck into `apps/web` — requirements: `apps/web/package.json` gains scripts `"lint": "eslint --flag unstable_native_nodejs_ts_config"`, `"format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore"`, `"typecheck": "tsc --noEmit"`, plus the `"prettier": "@acme/prettier-config"` field; devDeps gain `@acme/eslint-config`, `@acme/prettier-config` (workspace) and `eslint`, `prettier` (catalog) — mirror the `apps/expo` devDeps; create `apps/web/eslint.config.mts` extending `@acme/eslint-config/solid` (mirror `apps/expo/eslint.config.mts` shape); create `apps/web/.prettierignore` covering at least `dist` and the generated entries the sibling apps ignore; keep `check` (`vp check`) untouched; contingency: if `tsc --noEmit` cannot typecheck `e2e/**` or `playwright.config.ts`, exclude those paths in `apps/web/tsconfig.json` (one line) and re-run; commands: `pnpm --filter @acme/web add -D @acme/eslint-config @acme/prettier-config eslint prettier && pnpm nx run @acme/web:typecheck`
+- [x] 2. Wire lint/format/typecheck into `apps/web` — requirements: `apps/web/package.json` gains scripts `"lint": "eslint --flag unstable_native_nodejs_ts_config"`, `"format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore"`, `"typecheck": "tsc --noEmit"`, plus the `"prettier": "@acme/prettier-config"` field; devDeps gain `@acme/eslint-config`, `@acme/prettier-config` (workspace) and `eslint`, `prettier` (catalog) — mirror the `apps/expo` devDeps; create `apps/web/eslint.config.mts` extending `@acme/eslint-config/solid` (mirror `apps/expo/eslint.config.mts` shape); create `apps/web/.prettierignore` covering at least `dist` and the generated entries the sibling apps ignore; keep `check` (`vp check`) untouched; contingency: if `tsc --noEmit` cannot typecheck `e2e/**` or `playwright.config.ts`, exclude those paths in `apps/web/tsconfig.json` (one line) and re-run; commands: `pnpm --filter @acme/web add -D @acme/eslint-config @acme/prettier-config eslint prettier && pnpm nx run @acme/web:typecheck` (tsconfig contingency not needed: `tsc --noEmit` passed with e2e included)
 
-- [ ] 3. Make the new gates green — requirements: fix any lint/prettier/tsc findings the new config surfaces without changing app behavior; commands: `pnpm nx run @acme/web:lint && pnpm nx run @acme/web:format && pnpm nx run @acme/web:typecheck`
+- [x] 3. Make the new gates green — requirements: fix any lint/prettier/tsc findings the new config surfaces without changing app behavior; commands: `pnpm nx run @acme/web:lint && pnpm nx run @acme/web:format && pnpm nx run @acme/web:typecheck`
 
 ## 2. No-go
 
@@ -33,13 +33,13 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 *All boxes checked = spec done.*
 
-- [ ] `grep -n '"./solid"' tooling/eslint/package.json` prints the new export.
-- [ ] `pnpm nx run @acme/web:lint` exits 0.
-- [ ] `pnpm nx run @acme/web:format` exits 0.
-- [ ] `pnpm nx run @acme/web:typecheck` exits 0.
-- [ ] `pnpm lint && pnpm format && pnpm typecheck` exit 0 with `@acme/web` now included in the Nx run (lint/format task count up by one).
-- [ ] `pnpm --filter @acme/web e2e` → 2 tests pass.
-- [ ] every objective in section 1 is checked.
+- [x] `grep -n '"./solid"' tooling/eslint/package.json` prints the new export.
+- [x] `pnpm nx run @acme/web:lint` exits 0.
+- [x] `pnpm nx run @acme/web:format` exits 0.
+- [x] `pnpm nx run @acme/web:typecheck` exits 0.
+- [x] `pnpm lint && pnpm format && pnpm typecheck` exit 0 with `@acme/web` now included in the Nx run (lint/format task count up by one).
+- [x] `pnpm --filter @acme/web e2e` → 2 tests pass.
+- [x] every objective in section 1 is checked.
 
 ## 4. Divergences
 
@@ -50,7 +50,7 @@ why, the fix attempt(s), and (if unresolved) a pointer to a tracking file. Keep
 the `- [ ]` testing-criteria box unchecked and note the divergence inline next
 to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
-- [ ] every divergence found is appended below (or the section reads "None.")
+- [x] every divergence found is appended below (or the section reads "None.")
 
 *Format (one numbered item per divergence):*
 
@@ -61,7 +61,7 @@ to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
 ### Divergences
 
-None yet — to be filled in at execution time.
+1. `tooling/eslint/solid.ts` exports `solidConfig` as a framework-only preset (mirroring `tooling/eslint/react.ts`: plugin config scoped to `files`, composed with `baseConfig` in the app's `eslint.config.mts`) instead of extending `./base` as objective 1 stated — extending `./base` inside the preset would double-apply `baseConfig` in `apps/web/eslint.config.mts`, which objective 2 requires to mirror `apps/expo/eslint.config.mts`'s `baseConfig` + framework composition; the two objectives were mutually incompatible as written, and the `react.ts` precedent was chosen to keep the preset family consistent. (Verified 2026-10-28: 0 fix attempts needed — all gates, root run, and e2e green with this shape; no criteria blocked.)
 
 ### Unresolved divergences → `specs/divergencies/`
 

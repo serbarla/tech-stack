@@ -15,11 +15,11 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 ## 1. Objectives
 
-- [ ] 1. Fix the Nx affected base — requirements: `nx.json` `"defaultBase": "main"` → `"master"` (the host repo's default branch; template adopters who publish on `main` must flip this after export — note it in the README CI section); commands: `grep -n "defaultBase" nx.json`
+- [x] 1. Fix the Nx affected base — requirements: `nx.json` `"defaultBase": "main"` → `"master"` (the host repo's default branch; template adopters who publish on `main` must flip this after export — note it in the README CI section); commands: `grep -n "defaultBase" nx.json`
 
-- [ ] 2. Fix the CI push trigger — requirements: `.github/workflows/ci.yml` `push: branches: ["main"]` → `["master"]`; `pull_request`/`merge_group` triggers and everything else unchanged; update the README CI section wording (`main` → `master`); commands: `ruby -ryaml -e 'YAML.load_file(".github/workflows/ci.yml"); puts "ok"'`
+- [x] 2. Fix the CI push trigger — requirements: `.github/workflows/ci.yml` `push: branches: ["main"]` → `["master"]`; `pull_request`/`merge_group` triggers and everything else unchanged; update the README CI section wording (`main` → `master`); commands: `ruby -ryaml -e 'YAML.load_file(".github/workflows/ci.yml"); puts "ok"'`
 
-- [ ] 3. Freeze the CI install — requirements: `tooling/github/setup/action.yml` install step `pnpm install` → `pnpm install --frozen-lockfile`; contingency: if frozen install fails locally on the current tree, run a plain `pnpm install` to sync the lockfile, commit it, then re-run frozen — the lockfile must end up reproducible; commands: `grep -n "pnpm install" tooling/github/setup/action.yml`
+- [x] 3. Freeze the CI install — requirements: `tooling/github/setup/action.yml` install step `pnpm install` → `pnpm install --frozen-lockfile`; contingency: if frozen install fails locally on the current tree, run a plain `pnpm install` to sync the lockfile, commit it, then re-run frozen — the lockfile must end up reproducible; commands: `grep -n "pnpm install" tooling/github/setup/action.yml`
 
 ## 2. No-go
 
@@ -32,11 +32,11 @@ divergence under Testing criteria, NEVER improvise outside the objectives.
 
 *All boxes checked = spec done.*
 
-- [ ] `grep -n '"defaultBase"' nx.json` → `"defaultBase": "master"`.
-- [ ] `ruby -ryaml -e 'YAML.load_file(".github/workflows/ci.yml"); puts "ok"'` prints `ok`.
-- [ ] `grep -n "frozen-lockfile" tooling/github/setup/action.yml` prints the frozen install step.
-- [ ] `pnpm install --frozen-lockfile` exits 0 at repo root; `git status --short` clean afterwards.
-- [ ] every objective in section 1 is checked.
+- [x] `grep -n '"defaultBase"' nx.json` → `"defaultBase": "master"`.
+- [x] `ruby -ryaml -e 'YAML.load_file(".github/workflows/ci.yml"); puts "ok"'` prints `ok`.
+- [x] `grep -n "frozen-lockfile" tooling/github/setup/action.yml` prints the frozen install step.
+- [x] `pnpm install --frozen-lockfile` exits 0 at repo root; `git status --short` clean afterwards.
+- [x] every objective in section 1 is checked.
 
 ## 4. Divergences
 
@@ -47,7 +47,7 @@ why, the fix attempt(s), and (if unresolved) a pointer to a tracking file. Keep
 the `- [ ]` testing-criteria box unchecked and note the divergence inline next
 to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
-- [ ] every divergence found is appended below (or the section reads "None.")
+- [x] every divergence found is appended below (or the section reads "None.")
 
 *Format (one numbered item per divergence):*
 
@@ -58,7 +58,7 @@ to it, exactly as in `specs/02-B-database-drizzle-to-mikroorm-kysely.md`.*
 
 ### Divergences
 
-None yet — to be filled in at execution time.
+None.
 
 ### Unresolved divergences → `specs/divergencies/`
 

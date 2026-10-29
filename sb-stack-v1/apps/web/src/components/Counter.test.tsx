@@ -1,5 +1,9 @@
-import { render, fireEvent } from "@solidjs/testing-library";
-import { captureArtifact, expectNoDiagnostics, expectRerunBudget } from "@solidjs/diagnostics";
+import {
+  captureArtifact,
+  expectNoDiagnostics,
+  expectRerunBudget,
+} from "@solidjs/diagnostics";
+import { fireEvent, render } from "@solidjs/testing-library";
 import { flush } from "solid-js";
 import { describe, expect, test } from "vitest";
 
@@ -7,8 +11,8 @@ import Counter from "./Counter";
 
 describe("<Counter />", () => {
   test("it increments on click", () => {
-    const { getByRole } = render(() => <Counter />);
-    const button = getByRole("button");
+    const view = render(() => <Counter />);
+    const button = view.getByRole("button");
     expect(button).toHaveTextContent("Clicks: 0");
     fireEvent.click(button);
     // Solid batches DOM updates; flush() applies them synchronously.
@@ -22,8 +26,8 @@ describe("<Counter />", () => {
     // scopes re-ran, and why) — and folds what they saw into one artifact.
     const { artifact } = await captureArtifact(
       () => {
-        const { getByRole } = render(() => <Counter />);
-        const button = getByRole("button");
+        const view = render(() => <Counter />);
+        const button = view.getByRole("button");
         fireEvent.click(button);
         flush();
         expect(button).toHaveTextContent("Clicks: 1");

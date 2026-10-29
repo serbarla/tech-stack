@@ -1,8 +1,8 @@
-## Solid `basic` template
+# SB Stack — web
 
-`bare` plus the app floors most projects want: `@solidjs/router` with file-system routes, per-page titles via `@solidjs/meta`, and a `vitest` test suite.
+The Solid app of the SB Stack template: `@solidjs/router` with file-system routes, per-page titles via `@solidjs/meta`, API calls through Eden Treaty (`src/lib/api.ts`), and a sample `vitest` unit suite.
 
-**Deployment contract:** still zero server dependencies — `vite build` emits a purely static site; deploy `dist/client` to any static host. There is no server and no `start` script: on platforms that build and then run `npm start` in a Node container (Firebase App Hosting, most buildpacks), pick the static product instead (on Firebase, that is Hosting), or flip on SSR (below) to get a real server.
+**Deployment contract:** zero server dependencies — `pnpm build` emits a purely static site (`dist/client`, routes code-split); deploy it to any static host or serve it with the provided nginx image (`Dockerfile.web`). There is no `start` script: on platforms that build and then run `npm start` in a Node container, pick the static product instead.
 
 ## How it works
 
@@ -23,54 +23,29 @@ Every route is code-split automatically; navigating loads only that page's modul
 
 ## Data loading
 
-`src/routes/users/[id].tsx` shows the data pattern: an async `query()` (from `@solidjs/router`) read through a memo. The surrounding `<Loading>` boundary in `App.tsx` shows its fallback until the promise settles, and `query()` caches by key so preload and render share one request. The data is a local JSON module (`src/data/users.json`); swap the query body for any API call. Two things to keep in mind once SSR is on: use absolute URLs, and don't `fetch` your own origin from the server — behind a proxy (most PaaS hosts) the incoming `Host` header rarely routes back to the container. Data that lives with the app belongs in a server function (the `fullstack` template shows this).
+`src/routes/users/[id].tsx` shows the data pattern: an async `query()` (from `@solidjs/router`) read through a memo. The surrounding `<Loading>` boundary in `App.tsx` shows its fallback until the promise settles, and `query()` caches by key so preload and render share one request. The sample data is a local JSON module (`src/lib/users.json`); swap the query body for any API call.
+
+## API access
+
+`src/lib/api.ts` builds an Eden Treaty client against the API server; its base URL comes from `VITE_API_URL` (declared in `.env.schema`, default `http://localhost:3000`). In the Docker deployment the web bundle is built with `VITE_API_URL` set to the web origin so calls go through the nginx `/api` proxy.
 
 ## Testing
 
-`vitest` runs component tests in jsdom via `@solidjs/testing-library` — add `*.test.tsx` files next to what they test. See `src/components/Counter.test.tsx` for the pattern; note Solid 2.0 batches DOM updates, so tests call `flush()` after firing events before asserting on the DOM.
+- **Unit** — `pnpm --filter @acme/web test` runs `vitest` in jsdom via `@solidjs/testing-library`; add `*.test.tsx` files under `src/` (the runner's include is `src/**/*.test.{ts,tsx}`, so the Playwright specs under `e2e/` are never collected). See `src/components/Counter.test.tsx` for the pattern; note Solid batches DOM updates, so tests call `flush()` after firing events before asserting on the DOM.
+- **E2E** — `pnpm --filter @acme/web e2e` runs Playwright (`e2e/auth.spec.ts`), which boots the API server and the web dev server itself (see `playwright.config.ts`).
 
-## Usage
+## Available scripts
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+Run from `apps/web/` (or `pnpm --filter @acme/web <script>` from the repo root):
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
-
-```bash
-$ npm install # or pnpm install or yarn install
-```
-
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm run dev`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-
-### `npm run build`
-
-Builds the static production site to `dist/client`, routes code-split.
-
-### `npm run serve`
-
-Serves the production build locally.
-
-### `npm test`
-
-Runs the test suite.
+- `pnpm dev` — dev server at [http://localhost:3001](http://localhost:3001) (the API server runs separately at 3000).
+- `pnpm build` — static production build to `dist/client`.
+- `pnpm test` — unit suite (`vp test`).
+- `pnpm e2e` — Playwright suite.
+- `pnpm check` / `pnpm lint` / `pnpm format` / `pnpm typecheck` — the quality gates CI runs.
 
 ## The `ssr` flip
 
-Streaming SSR is one boolean: add `ssr: true` next to `start: true` in `vite.config.ts`. `src/App.tsx`, `src/Document.tsx`, and the routes carry over unchanged — `<HydrationScript />` is already in place in the Document (in client mode it is stripped from the static shell). The build then emits a request handler to `dist/server`; to run it on Node, use `start: { node: true }` so the build also emits a ready-to-run `dist/server/node.js` (`fullstack`'s README covers deployment).
+Streaming SSR is one boolean: add `ssr: true` next to `start: true` in `vite.config.ts`. `src/App.tsx`, `src/Document.tsx`, and the routes carry over unchanged — `<HydrationScript />` is already in place in the Document (in client mode it is stripped from the static shell). The build then emits a request handler to `dist/server`.
 
-## Growing out of `basic`
-
-- **A server** (data loading via server functions, mutations, sessions, API routes) is the `fullstack` template — same structure, more floors.
-- Want less? The `bare` template is the same shape without the router.
-
-## This project was created with the [Solid CLI](https://github.com/solidjs-community/solid-cli)
+Learn more on the [Solid website](https://solidjs.com).

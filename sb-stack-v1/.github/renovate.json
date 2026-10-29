@@ -5,6 +5,18 @@
     {
       "matchPackagePatterns": ["^@acme/"],
       "enabled": false
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "matchPackageNames": ["solid-js", "@solidjs/diagnostics", "better-auth"],
+      "automerge": false
+    },
+    {
+      "matchPackageNames": ["@elysiajs/swagger"],
+      "enabled": false
     }
   ],
   "updateInternalDeps": true,

@@ -1,5 +1,6 @@
 import { Title } from "@solidjs/meta";
 import { For } from "solid-js";
+
 import users from "../../lib/users.json";
 import { paths } from "../../router";
 
@@ -8,7 +9,7 @@ import { paths } from "../../router";
 export default function UsersIndex() {
   return (
     <section>
-      <Title>Users - Solid App</Title>
+      <Title>Users - SB Stack</Title>
       <ul>
         <For each={Object.entries(users)}>
           {([id, user]) => (

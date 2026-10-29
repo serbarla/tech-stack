@@ -5,7 +5,7 @@ export class InitialMigration extends Migration {
 
   override up(): void {
     this.addSql(
-      'create table "post" ("id" text not null primary key, "title" text not null, "content" text not null, "created_at" datetime not null, "updated_at" datetime not null);',
+      'create table if not exists "post" ("id" text not null primary key, "title" text not null, "content" text not null, "created_at" datetime not null, "updated_at" datetime not null);',
     );
   }
 
