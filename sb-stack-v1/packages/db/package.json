@@ -21,15 +21,14 @@
   },
   "dependencies": {
     "@mikro-orm/core": "catalog:",
-    "@mikro-orm/sql": "catalog:",
-    "kysely": "catalog:"
+    "@mikro-orm/migrations": "catalog:",
+    "@mikro-orm/sql": "catalog:"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:*",
     "@acme/prettier-config": "workspace:*",
     "@acme/tsconfig": "workspace:*",
     "@mikro-orm/cli": "catalog:",
-    "@mikro-orm/migrations": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",

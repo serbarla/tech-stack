@@ -10,7 +10,7 @@ export default function App() {
     <Router>
       {(props) => (
         <>
-          <Title>Solid App</Title>
+          <Title>SB Stack</Title>
           <nav>
             <a href={paths()}>Home</a>
             <a href={paths.users()}>Users</a>

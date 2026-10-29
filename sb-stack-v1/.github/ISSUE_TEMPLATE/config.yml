@@ -1,7 +1,7 @@
 contact_links:
   - name: Ask a question
-    url: https://github.com/serbarla/tech-stack
+    url: https://github.com/serbarla/tech-stack/discussions
     about: Ask questions and discuss with other community members
   - name: Feature request
-    url: https://github.com/serbarla/tech-stack/issues
+    url: https://github.com/serbarla/tech-stack/discussions
     about: Feature requests should be opened as discussions

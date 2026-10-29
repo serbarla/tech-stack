@@ -7,17 +7,31 @@ import type { Orm } from "@acme/db";
 
 import { startRequestLog, writeRequestLog } from "./logger";
 import { authed } from "./middleware";
-import { authRateLimit } from "./rate-limit";
+import { authRateLimit, resetRateLimit } from "./rate-limit";
 import { postRoutes } from "./router/post";
 import { SECURITY_HEADERS } from "./security";
 
-export function createApp(options: { auth: Auth; orm: Orm }) {
-  const { auth, orm } = options;
+export { resetRateLimit };
+
+export function createApp(options: {
+  auth: Auth;
+  orm: Orm;
+  corsOrigins?: string[];
+}) {
+  const { auth, orm, corsOrigins = ["http://localhost:3001"] } = options;
+  // swagger 1.0.5's .d.ts predates Elysia 1.4's generics (8 positional args,
+  // skipLibCheck hides it); letting its return type merge would poison App's
+  // route map and break Eden inference in web/expo. It only mutates `app`,
+  // so pin the plugin to the empty-schema shape. Mounted only outside
+  // production: /swagger returns 404 there.
+  const docs = (process.env.NODE_ENV !== "production"
+    ? swagger({ path: "/swagger" })
+    : (app: Elysia) => app) as unknown as (app: Elysia) => Elysia;
   return (
     new Elysia()
       .use(
         cors({
-          origin: ["http://localhost:3001"],
+          origin: corsOrigins,
           methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
           credentials: true,
           allowedHeaders: ["Content-Type", "Authorization"],
@@ -35,11 +49,7 @@ export function createApp(options: { auth: Auth; orm: Orm }) {
       .onAfterResponse(({ request, responseValue, set }) => {
         writeRequestLog(request, set.status, responseValue);
       })
-      // swagger 1.0.5's .d.ts predates Elysia 1.4's generics (8 positional args,
-      // skipLibCheck hides it); letting its return type merge would poison App's
-      // route map and break Eden inference in web/expo. It only mutates `app`,
-      // so pin the plugin to the empty-schema shape.
-      .use(swagger({ path: "/swagger" }) as unknown as (app: Elysia) => Elysia)
+      .use(docs)
       .get("/healthz", () => ({ ok: true }))
       .mount(auth.handler)
       .use(authed(auth))

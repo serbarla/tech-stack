@@ -37,6 +37,9 @@ export default defineConfig({
     environment: "jsdom",
     globals: false,
     setupFiles: ["./vitest-setup.ts"],
+    // Unit tests only — e2e/ holds Playwright specs (testDir: "./e2e"), which
+    // vitest must not collect.
+    include: ["src/**/*.test.{ts,tsx}"],
     // if you have few tests, try commenting this
     // out to improve performance:
     isolate: false,

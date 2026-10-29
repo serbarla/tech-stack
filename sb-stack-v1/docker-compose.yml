@@ -4,12 +4,13 @@ services:
     ports: ["3000:3000"]
     # List syntax = passthrough: set in the operator's shell/`.env` → forwarded;
     # unset → variable absent in the container → .env.schema default applies.
+    # PORT is deliberately not passed through: the container always serves 3000
+    # (port map + healthcheck hardcode it).
     environment:
       - DATABASE_URL=/data/sqlite.db
       - AUTH_SECRET
       - BETTER_AUTH_URL
-      - PORT
-    volumes: ["./data:/data"]
+    volumes: ["sb-data:/data"]
     healthcheck:
       test: ["CMD", "bun", "-e", 'process.exit((await fetch("http://127.0.0.1:3000/api/auth/ok")).ok ? 0 : 1)']
       interval: 10s
@@ -20,7 +21,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-      args: [VITE_API_URL]
+      args:
+        VITE_API_URL: ${VITE_API_URL:?set VITE_API_URL to the public web origin (e.g. http://host:3001)}
     ports: ["3001:80"]
     depends_on:
       server:
@@ -31,3 +33,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+
+volumes:
+  sb-data:

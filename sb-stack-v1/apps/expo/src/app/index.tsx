@@ -123,7 +123,7 @@ function MobileAuth() {
     return (
       <>
         <Text className="text-foreground pb-2 text-center text-xl font-semibold">
-          {session.user.name ? `Hello, ${session.user.name}` : "Not logged in"}
+          {`Hello, ${session.user.name || session.user.email}`}
         </Text>
         <Pressable
           onPress={() => void authClient.signOut()}
@@ -216,7 +216,7 @@ export default function Index() {
       <Stack.Screen options={{ title: "Home Page" }} />
       <View className="bg-background h-full w-full p-4">
         <Text className="text-foreground pb-2 text-center text-5xl font-bold">
-          Create <Text className="text-primary">T3</Text> Turbo
+          SB <Text className="text-primary">Stack</Text>
         </Text>
 
         <MobileAuth />
@@ -239,6 +239,12 @@ export default function Index() {
             />
           )}
         />
+
+        {deletePostMutation.error && (
+          <Text className="text-destructive mt-2">
+            {deletePostMutation.error.message}
+          </Text>
+        )}
 
         <CreatePost />
       </View>

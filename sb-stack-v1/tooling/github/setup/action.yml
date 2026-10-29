@@ -10,5 +10,15 @@ runs:
         node-version-file: ".nvmrc"
     - uses: oven-sh/setup-bun@v2
 
+    # Explicit cache (not setup-node's `cache: pnpm`, which needs pnpm on PATH
+    # first): restore is order-independent and covers the whole store.
+    - name: Cache pnpm store
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/pnpm/store
+        key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-
+
     - shell: bash
       run: pnpm install --frozen-lockfile

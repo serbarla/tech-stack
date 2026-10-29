@@ -6,7 +6,7 @@ import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 /**
- * All packages that leverage t3-env should use this rule
+ * All packages that leverage varlock env should use this rule
  */
 export const restrictEnvAccess = defineConfig(
   { ignores: ["**/env.ts"] },
@@ -19,7 +19,7 @@ export const restrictEnvAccess = defineConfig(
           object: "process",
           property: "env",
           message:
-            "Use `import { env } from '~/env'` instead to ensure validated types.",
+            'Use `import { ENV } from "varlock/env"` instead to ensure validated types.',
         },
       ],
       "no-restricted-imports": [
@@ -28,7 +28,7 @@ export const restrictEnvAccess = defineConfig(
           name: "process",
           importNames: ["env"],
           message:
-            "Use `import { env } from '~/env'` instead to ensure validated types.",
+            'Use `import { ENV } from "varlock/env"` instead to ensure validated types.',
         },
       ],
     },

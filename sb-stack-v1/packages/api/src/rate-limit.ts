@@ -20,12 +20,9 @@ export const authRateLimit = new Elysia({ name: "rate-limit" }).onRequest(
       }
     }
 
-    const forwarded = request.headers
-      .get("x-forwarded-for")
-      ?.split(",")
-      .map((entry) => entry.trim())
-      .find((entry) => entry !== "");
-    const ip = forwarded ?? server?.requestIP(request)?.address ?? "unknown";
+    // Bucket by socket address: XFF is client-spoofable (nginx appends, and
+    // port 3000 is directly exposed), so it must never key the limiter.
+    const ip = server?.requestIP(request)?.address ?? "unknown";
 
     let bucket = buckets.get(ip);
     if (!bucket || now >= bucket.resetAt) {
@@ -42,3 +39,9 @@ export const authRateLimit = new Elysia({ name: "rate-limit" }).onRequest(
     }
   },
 );
+
+// Test hook: the buckets Map persists across tests in one process (all
+// no-proxy traffic shares one key), so rate-limit-dependent tests reset it.
+export function resetRateLimit(): void {
+  buckets.clear();
+}

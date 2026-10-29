@@ -9,7 +9,7 @@ import { paths } from "../../router";
 export default function UsersIndex() {
   return (
     <section>
-      <Title>Users - Solid App</Title>
+      <Title>Users - SB Stack</Title>
       <ul>
         <For each={Object.entries(users)}>
           {([id, user]) => (

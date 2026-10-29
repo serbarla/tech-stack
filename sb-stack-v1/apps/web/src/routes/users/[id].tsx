@@ -34,15 +34,24 @@ export const route = {
 
 export default function User(props: RouteProps<"/users/:id">) {
   const user = createMemo(() => getUser(props.params.id));
+  // "Next" only when the id is numeric and the next user exists — a
+  // non-numeric id must not emit href "NaN", and the last user must not
+  // dead-end on a missing page.
+  const nextId = Number(props.params.id) + 1;
+  const hasNext =
+    Number.isInteger(Number(props.params.id)) &&
+    Boolean(userRecords[String(nextId)]);
 
   return (
     <section style={{ opacity: isPending(user) ? 0.5 : 1 }}>
-      <Title>{`User ${props.params.id} - Solid App`}</Title>
+      <Title>{`User ${props.params.id} - SB Stack`}</Title>
       <h2>{user().name}</h2>
       <p>{user().title}</p>
-      <p>
-        <a href={paths.users(Number(props.params.id) + 1)}>Next user</a>
-      </p>
+      {hasNext && (
+        <p>
+          <a href={paths.users(nextId)}>Next user</a>
+        </p>
+      )}
     </section>
   );
 }

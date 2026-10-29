@@ -25,14 +25,12 @@
     "@elysiajs/swagger": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@sinclair/typebox": "^0.34.0",
-    "elysia": "catalog:",
-    "zod": "catalog:"
+    "elysia": "catalog:"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:*",
     "@acme/prettier-config": "workspace:*",
     "@acme/tsconfig": "workspace:*",
-    "@elysiajs/eden": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
