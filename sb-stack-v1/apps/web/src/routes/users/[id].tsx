@@ -1,7 +1,7 @@
 import type { RouteDefinition, RouteProps } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { query } from "@solidjs/router";
-import { createMemo, isPending } from "solid-js";
+import { createMemo, isPending, Show } from "solid-js";
 
 import users from "../../lib/users.json";
 import { paths } from "../../router";
@@ -36,22 +36,28 @@ export default function User(props: RouteProps<"/users/:id">) {
   const user = createMemo(() => getUser(props.params.id));
   // "Next" only when the id is numeric and the next user exists — a
   // non-numeric id must not emit href "NaN", and the last user must not
-  // dead-end on a missing page.
-  const nextId = Number(props.params.id) + 1;
-  const hasNext =
-    Number.isInteger(Number(props.params.id)) &&
-    Boolean(userRecords[String(nextId)]);
+  // dead-end on a missing page. Must be a memo: navigating between ids
+  // reuses this component, so reading props.params.id eagerly would freeze
+  // the link from the first rendered id.
+  const nextId = createMemo(() => {
+    const id = Number(props.params.id);
+    return Number.isInteger(id) && userRecords[String(id + 1)]
+      ? id + 1
+      : undefined;
+  });
 
   return (
     <section style={{ opacity: isPending(user) ? 0.5 : 1 }}>
       <Title>{`User ${props.params.id} - SB Stack`}</Title>
       <h2>{user().name}</h2>
       <p>{user().title}</p>
-      {hasNext && (
-        <p>
-          <a href={paths.users(nextId)}>Next user</a>
-        </p>
-      )}
+      <Show when={nextId()}>
+        {(id) => (
+          <p>
+            <a href={paths.users(id())}>Next user</a>
+          </p>
+        )}
+      </Show>
     </section>
   );
 }
