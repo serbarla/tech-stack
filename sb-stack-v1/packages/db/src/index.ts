@@ -3,6 +3,7 @@ import { MikroORM, NodeSqliteDialect, SqliteDriver } from "@mikro-orm/sql";
 
 import { getDatabasePath } from "./db-path";
 import { Post } from "./entities/post";
+import { SQLITE_PRAGMA_STATEMENTS } from "./pragmas";
 
 export type Orm = MikroORM<
   SqliteDriver,
@@ -24,7 +25,9 @@ export async function initDb(): Promise<Orm> {
     entities: [Post],
     dbName: path,
   });
-  await orm.em.getConnection().execute("PRAGMA journal_mode=WAL");
+  for (const statement of SQLITE_PRAGMA_STATEMENTS) {
+    await orm.em.getConnection().execute(statement);
+  }
   return orm;
 }
 
@@ -39,3 +42,4 @@ export function getKysely() {
 
 export { getDatabasePath } from "./db-path";
 export { Post };
+export { SQLITE_PRAGMA_STATEMENTS } from "./pragmas";
