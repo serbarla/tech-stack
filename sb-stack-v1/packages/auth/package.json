@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@acme/db": "workspace:*",
     "@better-auth/expo": "catalog:",
     "better-auth": "catalog:"
   },

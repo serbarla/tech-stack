@@ -7,6 +7,8 @@ import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { DatabaseSync } from "node:sqlite";
 
+import { SQLITE_PRAGMA_STATEMENTS } from "@acme/db";
+
 // eslint-disable-next-line @typescript-eslint/require-await -- initAuth stays async per spec 13 (signature unchanged).
 export async function initAuth<
   TExtraPlugins extends BetterAuthPlugin[] = [],
@@ -17,8 +19,12 @@ export async function initAuth<
   trustedOrigins?: string[];
   extraPlugins?: TExtraPlugins;
 }): Promise<Auth> {
+  const database = new DatabaseSync(options.databaseUrl);
+  for (const statement of SQLITE_PRAGMA_STATEMENTS) {
+    database.exec(statement);
+  }
   const config: BetterAuthOptions = {
-    database: new DatabaseSync(options.databaseUrl),
+    database,
     baseURL: options.baseUrl,
     secret: options.secret,
     plugins: [expo(), ...(options.extraPlugins ?? [])],

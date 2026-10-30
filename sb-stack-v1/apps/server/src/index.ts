@@ -38,6 +38,15 @@ const auth = await initAuth<BetterAuthPlugin[]>({
   trustedOrigins: ["expo://", ...parsedOrigins],
 });
 
-createApp({ auth, orm, corsOrigins: parsedOrigins }).listen(ENV.PORT, () => {
-  console.log(`🦊 Elysia running at http://localhost:${ENV.PORT}`);
-});
+const serveOptions = {
+  port: ENV.PORT,
+  idleTimeout: 70,
+  maxRequestBodySize: 1_048_576,
+};
+
+createApp({ auth, orm, corsOrigins: parsedOrigins }).listen(
+  serveOptions,
+  () => {
+    console.log(`🦊 Elysia running at http://localhost:${ENV.PORT}`);
+  },
+);
