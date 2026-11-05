@@ -1,3 +1,7 @@
+## Coding
+
+Do not leave comments in any code
+
 ## Testing
 
 Unit testing is not required, avoid it, only end to end testing and integration testing are priorities
